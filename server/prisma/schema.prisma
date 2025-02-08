@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  UserID       Int       @id @default(autoincrement())
+  FirstName    String
+  LastName     String
+  Email        String   @unique
+  Password     String
+  Role         String
+  CreatedAt    DateTime @default(now())
+  ActiveSession Boolean
+  Sessions     Session[]
+  UserTests    UserTest[]
+}
+
+
+model Session {
+  SessionID     Int       @id @default(autoincrement())
+  UserID        Int
+  TestID        Int
+  Status        String
+  StartTime     DateTime
+  EndTime       DateTime
+  RejoinAllowed Boolean
+  User          User      @relation(fields: [UserID], references: [UserID])
+  Test          Test      @relation(fields: [TestID], references: [TestID])
+  Warnings      Warning[]
+}
+
+model Warning {
+  WarningID    Int       @id @default(autoincrement())
+  SessionID    Int
+  WarningType  String
+  Timestamps   DateTime
+  Session      Session  @relation(fields: [SessionID], references: [SessionID])
+}
+
+model Test {
+  TestID      Int       @id @default(autoincrement())
+  Title       String
+  Description String
+  Duration    Int
+  TotalMarks  Int
+  CreatedBy   Int
+  CreatedAt   DateTime @default(now())
+  Sessions    Session[]
+  Questions   TestQuestionRelation[]
+  UserTests   UserTest[]
+}
+
+model Questions {
+  QuestionID     Int     @id @default(autoincrement())
+  QuestionText   String
+  Marks          Int
+  CorrectOption  Int
+  Options        QuestionOption[]
+  Tests          TestQuestionRelation[]
+}
+
+model Options {
+  OptionID   Int     @id @default(autoincrement())
+  OptionText String
+  QuestionOptions QuestionOption[]
+}
+
+model QuestionOption {
+  OptionID   Int
+  QuestionID Int
+  Option     Options   @relation(fields: [OptionID], references: [OptionID])
+  Question   Questions @relation(fields: [QuestionID], references: [QuestionID])
+  @@id([OptionID, QuestionID])
+}
+
+model TestQuestionRelation {
+  TestID     Int
+  QuesID     Int
+  Test       Test      @relation(fields: [TestID], references: [TestID])
+  Question   Questions @relation(fields: [QuesID], references: [QuestionID])
+  @@id([TestID, QuesID])
+}
+
+model UserTest {
+  TestID Int
+  UserID Int
+  Test   Test @relation(fields: [TestID], references: [TestID])
+  User   User @relation(fields: [UserID], references: [UserID])
+  @@id([TestID, UserID])
+}
