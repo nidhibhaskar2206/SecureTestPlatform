@@ -149,7 +149,7 @@ const LoginPage = () => {
                     <AiOutlineEye fontSize={24} fill="#6B7280" />
                   )}
                 </span>
-                <Link to="/forgot-password">
+                <Link to="/forget-password">
                   <p className="mt-4 ml-auto mr-2 max-w-max text-sm text-blue-900">
                     Forgot Password
                   </p>
@@ -161,11 +161,14 @@ const LoginPage = () => {
                 </p>
               </Link>
               <button
-                type="submit"
-                className="mt-6 rounded-[8px] bg-orange-400 py-[8px] px-[12px] font-medium text-richblack-900"
-              >
-                Sign In
-              </button>
+              type="submit"
+              className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
+            >
+              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
+                <div className="relative h-full w-8 bg-white/20"></div>
+              </div>
+              <span className="mr-4 text-xl">Sign In</span>
+            </button>
             </form>
           </div>
         </div>
