@@ -1,15 +1,17 @@
 import { Route, Routes } from "react-router-dom";
-import TestPage from "./components/screens/TestPage";
-import HomePage from "./components/screens/HomePage";
-import InstructionsPage from "./components/screens/InstructionsPage";
-import LoginPage from "./components/screens/Login";
-import RegisterPage from "./components/screens/Register";
+import {Provider} from 'react-redux'
+import store from "./redux/store";
+import TestPage from "./screens/TestPage";
+import HomePage from "./screens/HomePage";
+import InstructionsPage from "./screens/InstructionsPage";
+import LoginPage from "./screens/Login";
+import RegisterPage from "./screens/Register";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <div>
+    <Provider store={store}>
       <ToastContainer
         position="bottom-right"
         autoClose={2000}
@@ -28,7 +30,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>
       </Routes>
-    </div>
+    </Provider>
   );
 }
 

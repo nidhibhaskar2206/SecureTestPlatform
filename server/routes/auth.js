@@ -4,13 +4,17 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import prisma from '../prisma.js';
 import { config } from '../config.js';
+import {auth} from '../middleware/auth.js'
+
 const router = express.Router();
+
 const registerSchema = z.object({
     firstName: z.string().min(2).max(50),
     lastName: z.string().min(2).max(50),
     email: z.string().email(),
     password: z.string().min(6)
 });
+
 router.post('/register', async (req, res) => {
     try {
         const data = registerSchema.parse(req.body);
@@ -62,7 +66,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         const token = jwt.sign({ id: user.id }, config.jwtSecret);
-        res.json({
+        res.status(200).json({
             user: {
                 id: user.id,
                 email: user.email,
@@ -72,6 +76,7 @@ router.post('/login', async (req, res) => {
             },
             token
         });
+
     }
     catch (error) {
         if (error instanceof z.ZodError) {
@@ -82,4 +87,9 @@ router.post('/login', async (req, res) => {
         }
     }
 });
+
+router.get('/user-auth', auth, (req,res) => {
+    res.status(200).send({ok: true});
+});
+
 export default router;

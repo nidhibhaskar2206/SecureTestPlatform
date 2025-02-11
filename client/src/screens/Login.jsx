@@ -1,21 +1,28 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import login from "../../assets/login.jpg";
-import logo from "../../assets/logo_bgless.png";
-import Header from "../common/Header";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setAuth } from "../redux/slices/authSlice";
+import login from "../assets/login.jpg";
+import axios from "axios";
+import logo from "../assets/logo_bgless.png";
+import Header from "../components/common/Header";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { toast } from "react-toastify";
+import config from "../utils/config";
 
-const RegisterPage = () => {
+const LoginPage = () => {
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
   });
 
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { firstName, lastName, email, password } = formData;
+  const { email, password } = formData;
 
   const handleOnChange = (e) => {
     setFormData((prevData) => ({
@@ -24,13 +31,64 @@ const RegisterPage = () => {
     }));
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
-    toast.success("Registered Successfull!");
+    setLoading(true);
+  
+    try {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast.error("Invalid email format");
+        setLoading(false);
+        return; 
+      }
+      if (!formData.password) {
+        toast.error("Password cannot be empty");
+        setLoading(false);
+        return;
+      }
+  
+      const response = await axios.post(
+        `${config.API_URL}/api/auth/login`,
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+  
+      if (response.data?.token) {
+        toast.success("Login successful!");
+        dispatch(setAuth(response.data));
+        navigate("/");
+      } else {
+        toast.error("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+  
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.error("Invalid input data. Please check your details.");
+        } else if (error.response.status === 401) {
+          toast.error("Invalid credentials. Please check your email or password.");
+        } else if (error.response.status === 500) {
+          toast.error("Server error. Please try again later.");
+        } else {
+          toast.error(error.response.data.error || "Something went wrong.");
+        }
+      } else if (error.request) {
+        toast.error("No response from server. Please check your connection.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   return (
-    <div className="w-screen h-[100vh] overflow-hidden">
+    <div className="w-[100vw] h-[100vh] overflow-hidden">
       {/* Image section */}
       <Header />
       <div className="flex">
@@ -45,43 +103,15 @@ const RegisterPage = () => {
               <img src={logo} alt="logo" className="w-auto h-" />
             </div>
             <div className="ml-6 mt-4 text-center text-4xl font-bold">
-              Register to Secure Test
+              Welcome to Secure Test
             </div>
           </div>
           {/* Form*/}
-          <div className="mt-16 w-[70%]">
+          <div className="mt-20 w-[70%]">
             <form
               onSubmit={handleOnSubmit}
               className="mt-6 flex w-full flex-col gap-y-4"
             >
-              <label className="w-full">
-                <p className="mb-4 text-xl leading-[1.375rem] text-richblack-5 font-[500]">
-                  First Name <sup className="text-pink-500">*</sup>
-                </p>
-                <input
-                  required
-                  type="text"
-                  name="firstName"
-                  value={firstName}
-                  onChange={handleOnChange}
-                  placeholder="Enter first name"
-                  className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.125px] focus:outline-gray-300"
-                />
-              </label>
-              <label className="w-full">
-                <p className="mb-4 text-xl leading-[1.375rem] text-richblack-5 font-[500]">
-                  Last Name <sup className="text-pink-500">*</sup>
-                </p>
-                <input
-                  required
-                  type="text"
-                  name="lastName"
-                  value={lastName}
-                  onChange={handleOnChange}
-                  placeholder="Enter last name"
-                  className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.125px] focus:outline-gray-300"
-                />
-              </label>
               <label className="w-full">
                 <p className="mb-4 text-xl leading-[1.375rem] text-richblack-5 font-[500]">
                   Email Address <sup className="text-pink-500">*</sup>
@@ -93,7 +123,7 @@ const RegisterPage = () => {
                   value={email}
                   onChange={handleOnChange}
                   placeholder="Enter email address"
-                  className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.125px] focus:outline-gray-300"
+                  className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.5px] focus:outline-gray-300"
                 />
               </label>
               <label className="relative mt-2">
@@ -107,7 +137,7 @@ const RegisterPage = () => {
                   value={password}
                   onChange={handleOnChange}
                   placeholder="Enter Password"
-                  className="form-style w-full !pr-10 border px-4 py-2 rounded-md focus:outline-[0.125px] focus:outline-gray-300"
+                  className="form-style w-full !pr-10 border px-4 py-2 rounded-md focus:outline-[0.5px] focus:outline-gray-300"
                 />
                 <span
                   onClick={() => setShowPassword((prev) => !prev)}
@@ -119,17 +149,22 @@ const RegisterPage = () => {
                     <AiOutlineEye fontSize={24} fill="#6B7280" />
                   )}
                 </span>
+                <Link to="/forgot-password">
+                  <p className="mt-4 ml-auto mr-2 max-w-max text-sm text-blue-900">
+                    Forgot Password
+                  </p>
+                </Link>
               </label>
-              <Link to="/login">
+              <Link to="/register">
                 <p className="text-center hover:underline underline-offset-2 text-orange-500">
-                  Already a member? Login
+                  Not a member? Create new account
                 </p>
               </Link>
               <button
                 type="submit"
                 className="mt-6 rounded-[8px] bg-orange-400 py-[8px] px-[12px] font-medium text-richblack-900"
               >
-                Sign Up
+                Sign In
               </button>
             </form>
           </div>
@@ -139,4 +174,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default LoginPage;
