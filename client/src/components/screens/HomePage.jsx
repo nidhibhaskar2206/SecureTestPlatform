@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../common/Header";
 import { useNavigate } from "react-router-dom";
+import Compatibilty from "./Compatibility";
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -10,9 +11,9 @@ const HomePage = () => {
         <Header />
       </div>
       <div className="mt-28">
-      <button onClick={()=> navigate('test')}>Start</button>
+        <button onClick={() => navigate("test")}>Start</button>
       </div>
-      
+      <Compatibilty/>
     </div>
   );
 };

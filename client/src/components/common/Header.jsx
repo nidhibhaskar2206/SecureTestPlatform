@@ -3,12 +3,14 @@ import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import  logo  from "../../assets/logo_bgless.png";
 import { Link } from 'react-router-dom';
+import Compatibilty from '../screens/Compatibility';
 
 const navigation = [
   { name: 'Product', link: '#' },
   { name: 'About', link: '/about' },
   { name: 'Contact', link: '/contact' },
   { name: 'Company', link: '#' },
+  { name: 'Compatibility', link: 'Compatibility'}
 ]
 
 export default function Header() {
