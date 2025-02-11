@@ -9,14 +9,12 @@ import { sendPasswordResetOtp } from '../utils/email.js';
 
 const router = express.Router();
 
-
 const registerSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
   password: z.string().min(6)
 });
-
 
 router.post('/register', async (req, res) => {
   try {
@@ -27,7 +25,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({ status: 'error', message: 'Email already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -49,12 +47,12 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, config.jwtSecret);
 
-    res.status(201).json({ user, token });
+    res.status(201).json({ status: 'success', user, token });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      res.status(400).json({ status: 'error', message: 'Invalid input data', details: error.errors });
     } else {
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ status: 'error', message: 'Server error' });
     }
   }
 });
@@ -71,12 +69,13 @@ router.post('/login', async (req, res) => {
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ id: user.id }, config.jwtSecret);
 
     res.json({
+      status: 'success',
       user: {
         id: user.id,
         email: user.email,
@@ -88,9 +87,9 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      res.status(400).json({ status: 'error', message: 'Invalid input data', details: error.errors });
     } else {
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ status: 'error', message: 'Server error' });
     }
   }
 });
@@ -108,7 +107,7 @@ router.post('/forgot-password', async (req, res) => {
 
     if (!user) {
       // Return 200 even if user not found for security
-      return res.json({ message: 'If an account exists, an OTP will be sent.' });
+      return res.json({ status: 'success', message: 'If an account exists, an OTP will be sent.' });
     }
 
     // Generate OTP
@@ -119,28 +118,28 @@ router.post('/forgot-password', async (req, res) => {
       where: { id: user.id },
       data: {
         resetPasswordOtp: otp,
-        resetPasswordOtpExpires: otpExpires
+        resetPasswordOtpExpires: otpExpires,
+        otpVerified: false
       }
     });
 
     await sendPasswordResetOtp(email, otp);
 
-    res.json({ message: 'If an account exists, an OTP will be sent.' });
+    res.json({ status: 'success', message: 'If an account exists, an OTP will be sent.' });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid email format' });
+      res.status(400).json({ status: 'error', message: 'Invalid email format' });
     } else {
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ status: 'error', message: 'Server error' });
     }
   }
 });
 
-// Reset Password with OTP
-router.post('/reset-password', async (req, res) => {
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
   try {
-    const { otp, newPassword } = z.object({
-      otp: z.string(),
-      newPassword: z.string().min(6)
+    const { otp } = z.object({
+      otp: z.string()
     }).parse(req.body);
 
     const user = await prisma.user.findFirst({
@@ -153,7 +152,41 @@ router.post('/reset-password', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ error: 'Invalid or expired OTP' });
+      return res.status(400).json({ status: 'error', message: 'Invalid or expired OTP' });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        otpVerified: true
+      }
+    });
+
+    res.json({ status: 'success', message: 'OTP verified successfully' });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ status: 'error', message: 'Invalid input data', details: error.errors });
+    } else {
+      res.status(500).json({ status: 'error', message: 'Server error' });
+    }
+  }
+});
+
+// Reset Password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { newPassword } = z.object({
+      newPassword: z.string().min(6)
+    }).parse(req.body);
+
+    const user = await prisma.user.findFirst({
+      where: {
+        otpVerified: true
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({ status: 'error', message: 'OTP not verified' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -163,19 +196,28 @@ router.post('/reset-password', async (req, res) => {
       data: {
         password: hashedPassword,
         resetPasswordOtp: null,
-        resetPasswordOtpExpires: null
+        resetPasswordOtpExpires: null,
+        otpVerified: false
       }
     });
 
-    res.json({ message: 'Password has been reset successfully' });
+    res.json({ status: 'success', message: 'Password has been reset successfully' });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Invalid input data', details: error.errors });
+      res.status(400).json({ status: 'error', message: 'Invalid input data', details: error.errors });
     } else {
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ status: 'error', message: 'Server error' });
     }
   }
 });
+
+export default router;
+
+
+
+
+
+
 
 // // Forgot Password - Request reset
 // router.post('/forgot-password', async (req, res) => {
@@ -260,5 +302,3 @@ router.post('/reset-password', async (req, res) => {
 // });
 
 //rebase test 1
-
-export default router;

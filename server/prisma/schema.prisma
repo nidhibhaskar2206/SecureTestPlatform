@@ -41,6 +41,7 @@ model User {
   activeSession         Boolean   @default(false)
   resetPasswordOtp      String?   @unique
   resetPasswordOtpExpires DateTime?
+  otpVerified           Boolean   @default(false)
   sessions              Session[]
   userTests             UserTest[]
   createdTests          Test[]    @relation("TestCreator")
