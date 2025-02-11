@@ -7,7 +7,7 @@ export const auth = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      throw new Error();
+      return res.status(401).send({message: "Token not present"})
     }
 
     const decoded = jwt.verify(token, config.jwtSecret);
@@ -17,7 +17,7 @@ export const auth = async (req, res, next) => {
     });
 
     if (!user) {
-      throw new Error();
+      return res.status(404).send({ message: "User not found" });
     }
 
     req.user = user;

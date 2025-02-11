@@ -9,12 +9,14 @@ import { sendPasswordResetOtp } from '../utils/email.js';
 
 const router = express.Router();
 
+
 const registerSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
   password: z.string().min(6)
 });
+
 
 router.post('/register', async (req, res) => {
   try {
