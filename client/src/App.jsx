@@ -6,6 +6,7 @@ import HomePage from "./screens/HomePage";
 import InstructionsPage from "./screens/InstructionsPage";
 import LoginPage from "./screens/Login";
 import RegisterPage from "./screens/Register";
+import ForgetPage from "./screens/Forgot";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -26,6 +27,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/forget-password" element={<ForgetPage/>}/>
         <Route path="/instructions" element={<InstructionsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>

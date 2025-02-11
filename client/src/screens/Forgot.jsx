@@ -127,16 +127,16 @@ const ForgetPage = () => {
       case 1:
         return (
           <form onSubmit={handleGetOtp} className="space-y-6">
-            <label className="w-full">
+            <label className="w-full" htmlFor="email">
                 <p className="mb-4 text-xl leading-[1.375rem] text-richblack-5 font-[500]">
                   Email Address <sup className="text-pink-500">*</sup>
                 </p>
                 <input
                   required
-                  type="text"
+                  type="email"
                   name="email"
                   value={email}
-                  onChange={(e)=>{setEmail(e.target.value)}}
+                  onChange={(e)=>{ setEmail(e.target.value)}}
                   placeholder="Enter email address"
                   className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.5px] focus:outline-gray-300"
                 />
@@ -221,46 +221,20 @@ const ForgetPage = () => {
       case 3:
         return (
           <form onSubmit={handleResetPassword} className="space-y-6">
-            <div>
-              <label htmlFor="password" className="sr-only">
-                New Password
-              </label>
-              <div className="mt-2.5 relative text-gray-400 focus-within:text-gray-600">
-                <div className="absolute inset-y-0 left-0   flex items-center pl-3 pointer-events-none">
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      {" "}
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M10.5 9C12.9853 9 15 6.98528 15 4.5C15 2.01472 12.9853 0 10.5 0C8.01475 0 6.00003 2.01472 6.00003 4.5C6.00003 5.38054 6.25294 6.20201 6.69008 6.89574L0.585815 13L3.58292 15.9971L4.99714 14.5829L3.41424 13L5.00003 11.4142L6.58292 12.9971L7.99714 11.5829L6.41424 10L8.10429 8.30995C8.79801 8.74709 9.61949 9 10.5 9ZM10.5 7C11.8807 7 13 5.88071 13 4.5C13 3.11929 11.8807 2 10.5 2C9.11932 2 8.00003 3.11929 8.00003 4.5C8.00003 5.88071 9.11932 7 10.5 7Z"
-                        fill="#9ca3af"
-                      ></path>{" "}
-                    </g>
-                  </svg>
-                </div>
+            <label className="w-full" htmlFor="password">
+                <p className="mb-4 text-xl leading-[1.375rem] text-richblack-5 font-[500]">
+                  New Password<sup className="text-pink-500">*</sup>
+                </p>
                 <input
+                  required
                   type="password"
                   name="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  id
-                  placeholder="Enter new password"
-                  className="block w-full py-4 pl-10 pr-4 text-black placeholder-gray-500 transition-all duration-200 border border-gray-400 rounded-md bg-gray-50 focus:outline-none"
+                  onChange={(e)=>{setNewPassword(e.target.value)}}
+                  placeholder="Enter email address"
+                  className="form-style w-full border px-4 py-2 rounded-md focus:outline-[0.5px] focus:outline-gray-300"
                 />
-              </div>
-            </div>
+              </label>
             <button
               type="submit"
               className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
