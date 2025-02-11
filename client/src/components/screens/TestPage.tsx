@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 const questions = [
@@ -33,10 +33,29 @@ export default function TestPage() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    // Request camera and microphone permissions
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      })
+      .catch((error) => {
+        console.error("Error accessing camera and microphone:", error);
+      });
+    
+    // Enable full-screen mode
+    document.documentElement.requestFullscreen().catch((err) => {
+      console.error("Error attempting to enable full-screen mode:", err);
+    });
+  }, []);
 
   const feedbackFormHandler = () => {
     navigate('/');
-  }
+  };
 
   const handleOptionClick = (option) => {
     setSelectedOption(option);
@@ -66,7 +85,7 @@ export default function TestPage() {
   };
 
   return (
-    <div className="flex h-screen p-5 bg-gray-100">
+    <div className="flex h-screen p-5 bg-gray-100 relative">
       {/* Sidebar Navigation - Hide when feedback is shown */}
       {!showFeedback && (
         <div className="w-20 bg-white p-4 shadow-lg rounded-lg flex flex-col items-center space-y-2">
@@ -86,6 +105,11 @@ export default function TestPage() {
 
       {/* Quiz Section */}
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg mx-5 flex flex-col justify-between relative">
+        {/* Camera Preview Box */}
+        <div className="absolute top-4 right-4 w-32 h-24 bg-black rounded-lg overflow-hidden border border-gray-300">
+          <video ref={videoRef} autoPlay playsInline className="w-full h-full"></video>
+        </div>
+
         {showFeedback ? (
           <div className="flex flex-col">
             <h2 className="text-2xl font-semibold">
