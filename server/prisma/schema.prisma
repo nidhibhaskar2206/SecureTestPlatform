@@ -31,19 +31,22 @@ enum WarningType {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  firstName     String    @db.VarChar(50)
-  lastName      String    @db.VarChar(50)
-  email         String    @unique @db.VarChar(255)
-  password      String    
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  activeSession Boolean   @default(false)
-  sessions      Session[]
-  userTests     UserTest[]
-  createdTests  Test[]    @relation("TestCreator")
+  id                    Int       @id @default(autoincrement())
+  firstName             String    @db.VarChar(50)
+  lastName              String    @db.VarChar(50)
+  email                 String    @unique @db.VarChar(255)
+  password              String    
+  role                  UserRole  @default(USER)
+  createdAt             DateTime  @default(now())
+  activeSession         Boolean   @default(false)
+  resetPasswordOtp      String?   @unique
+  resetPasswordOtpExpires DateTime?
+  sessions              Session[]
+  userTests             UserTest[]
+  createdTests          Test[]    @relation("TestCreator")
 
   @@index([email])
+  @@index([resetPasswordOtp])
 }
 
 model Session {
@@ -54,7 +57,7 @@ model Session {
   startTime      DateTime
   endTime        DateTime
   rejoinAllowed  Boolean       @default(false)
-  score          Int?         // Added to store test results
+  score          Int?
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   test           Test          @relation(fields: [testId], references: [id], onDelete: Cascade)
   warnings       Warning[]
@@ -78,7 +81,7 @@ model Test {
   id          Int       @id @default(autoincrement())
   title       String    @db.VarChar(255)
   description String    @db.Text
-  duration    Int       // in minutes
+  duration    Int
   totalMarks  Int
   createdBy   Int
   createdAt   DateTime  @default(now())
