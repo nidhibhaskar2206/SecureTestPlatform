@@ -14,6 +14,7 @@ const navigation = [
   { name: "About", link: "/about" },
   { name: "Contact", link: "/contact" },
   { name: "Tests", link: "/test" },
+  { name: "Create Test", link: "/test-creation" },
 ];
 
 export default function Header() {
