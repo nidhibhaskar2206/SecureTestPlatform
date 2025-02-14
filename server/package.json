@@ -1,9 +1,12 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -11,15 +14,19 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.3.0",
+    "arg": "^5.0.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mysql2": "^3.12.0"
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
+    "nodemailer": "^6.10.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/node": "^22.12.0",
     "nodemon": "^3.1.9",
-    "prisma": "^6.3.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "prisma": "^6.3.0"
   }
 }
