@@ -103,7 +103,7 @@ const RegisterPage = () => {
         {/* Form section */}
         <div className="lg:w-1/2 flex flex-col justify-center items-center">
           {/* Header */}
-          <div>
+          <div className="flex flex-col items-center justify-center">
             <div>
               <img src={logo} alt="logo" className="w-auto h-" />
             </div>

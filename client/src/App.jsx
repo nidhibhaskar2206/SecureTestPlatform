@@ -9,12 +9,13 @@ import RegisterPage from "./screens/Register";
 import ForgetPage from "./screens/Forgot";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ContactPage from "./screens/Contact";
 
 function App() {
   return (
     <Provider store={store}>
       <ToastContainer
-        position="bottom-right"
+        position="top-right"
         autoClose={2000}
         hideProgressBar={false}
         toastStyle={{
@@ -31,6 +32,7 @@ function App() {
         <Route path="/instructions" element={<InstructionsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>
+        <Route path="/contact" element={<ContactPage/>}/>
       </Routes>
     </Provider>
   );
