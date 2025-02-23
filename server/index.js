@@ -1,18 +1,35 @@
-import express from 'express';
-import cors from 'cors';
-import { config } from './config.js';
-import authRoutes from './routes/auth.js';
-import testRoutes from './routes/tests.js';
-import sessionRoutes from './routes/sessions.js';
+import express from "express";
+import cors from "cors";
+import { config } from "./config.js";
+import authRoutes from "./routes/auth.js";
+import testRoutes from "./routes/tests.js";
+import sessionRoutes from "./routes/sessions.js";
+import assignRoutes from "./routes/assign.js";
+
 const app = express();
-app.use(cors({
+
+app.use(
+  cors({
     origin: config.corsOrigin,
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 app.use(express.json());
-app.use('/api/auth', authRoutes);
-app.use('/api/tests', testRoutes);
-app.use('/api/sessions', sessionRoutes);
+
+console.log("Registering routes...");
+
+app.use("/api/auth", authRoutes);
+console.log("Auth routes registered");
+
+app.use("/api/tests", testRoutes);
+console.log("Test routes registered");
+
+app.use("/api/sessions", sessionRoutes);
+console.log("Session routes registered");
+
+app.use("/api/assign", assignRoutes);
+console.log("Assign routes registered");
+
 app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+  console.log(`Server running on port ${config.port}`);
 });
