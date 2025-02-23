@@ -10,6 +10,9 @@ import ForgetPage from "./screens/Forgot";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ContactPage from "./screens/Contact";
+import TestCreation from "./components/core/dashboard/tests/TestCreation";
+import AddQuestionsAndOptions from "./components/core/dashboard/tests/AddQuestionsAndAnswers";
+import TestsList from "./components/core/dashboard/tests/TestList";
 
 function App() {
   return (
@@ -33,6 +36,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>
         <Route path="/contact" element={<ContactPage/>}/>
+        <Route path="/test-creation" element={<TestCreation/>} />
+        <Route path="/addques" element={<AddQuestionsAndOptions/>}/>
+        <Route path="/testslist" element={<TestsList/>}/>
       </Routes>
     </Provider>
   );
