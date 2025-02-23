@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useSelector, useDispatch } from "react-redux";
-import { clearAuth, setAuth } from "../../redux/slices/authSlice";
+import { clearAuth } from "../../redux/slices/authSlice";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 const navigation = [
   { name: "About", link: "/about" },
   { name: "Contact", link: "/contact" },
-  { name: "Tests", link: "/test" },
+  { name: "Tests", link: "/instructions" },
   { name: "Create Test", link: "/test-creation" },
 ];
 
@@ -58,7 +58,7 @@ export default function Header() {
           {auth?.user ? (
             <>
               <Link
-                to="/dashboard"
+                to="/testslist"
                 className="hidden text-lg font-semibold text-orange-500 lg:block"
               >
                 Dashboard
