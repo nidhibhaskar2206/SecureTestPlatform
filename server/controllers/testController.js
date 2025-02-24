@@ -12,7 +12,6 @@ const questionSchema = z.object({
   testId: z.number().min(1),
   questionText: z.string(),
   marks: z.number().min(1),
-  correctOption: z.number().min(0).max(3)
 });
 
 const optionSchema = z.object({
@@ -25,11 +24,11 @@ export const createTest = async (req, res) => {
     const data = testSchema.parse(req.body);
     const test = await prisma.test.create({
       data: {
-        title: data.title,
-        description: data.description,
-        duration: data.duration,
-        totalMarks: data.totalMarks,
-        createdBy: req.user.id
+        Title: data.title,
+        Description: data.description,
+        Duration: data.duration,
+        TotalMarks: data.totalMarks,
+        CreatedBy: req.user.UserID
       }
     });
     res.status(201).json(test);
@@ -45,7 +44,6 @@ export const addQuestion = async (req, res) => {
       data: {
         questionText: data.questionText,
         marks: data.marks,
-        correctOption: data.correctOption
       }
     });
     await prisma.testQuestionRelation.create({
@@ -83,11 +81,10 @@ export const addOption = async (req, res) => {
 export const getAllTests = async (req, res) => {
   const tests = await prisma.test.findMany({
     where: {
-      isActive: true,
-      ...(req.user?.role !== 'ADMIN' && {
-        userTests: {
+      ...(req.user?.Role !== 'ADMIN' && {
+        UserTests: {
           some: {
-            userId: req.user.id
+            userId: req.user.UserID
           }
         }
       })
@@ -95,8 +92,8 @@ export const getAllTests = async (req, res) => {
     include: {
       creator: {
         select: {
-          firstName: true,
-          lastName: true
+          FirstName: true,
+          LastName: true
         }
       }
     }
@@ -106,25 +103,26 @@ export const getAllTests = async (req, res) => {
 
 export const getTestById = async (req, res) => {
   const test = await prisma.test.findUnique({
-    where: { id: parseInt(req.params.id) },
+    where: { TestID: parseInt(req.params.id) },
     include: {
-      questions: {
+      Questions: {
         include: {
           question: {
             include: {
-              options: {
-                include: {
-                  option: true
-                }
-              }
+              options: true
             }
           }
         }
-      }
+      },
+      creator: true,
+      Sessions: true,
+      UserTests: true
     }
   });
+
   if (!test) {
     return res.status(404).json({ error: 'Test not found' });
   }
+
   res.json(test);
 };
