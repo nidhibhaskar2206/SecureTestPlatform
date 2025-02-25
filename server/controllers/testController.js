@@ -19,6 +19,16 @@ const optionSchema = z.object({
   optionText: z.string()
 });
 
+const multipleOptionsSchema = z.object({
+  questionId: z.number().min(1),
+  options: z.array(z.string().min(1))
+});
+
+const correctOptionSchema = z.object({
+  questionId: z.number().min(1),
+  optionId: z.number().min(1)
+});
+
 export const createTest = async (req, res) => {
   try {
     const data = testSchema.parse(req.body);
@@ -78,6 +88,45 @@ export const addOption = async (req, res) => {
   }
 };
 
+export const addMultipleOptions = async (req, res) => {
+  try {
+    const data = multipleOptionsSchema.parse(req.body);
+    const optionCreationPromises = data.options.map(async (optionText) => {
+      const option = await prisma.option.create({
+        data: {
+          optionText
+        }
+      });
+      await prisma.questionOption.create({
+        data: {
+          questionId: data.questionId,
+          optionId: option.id
+        }
+      });
+      return option;
+    });
+    const options = await Promise.all(optionCreationPromises);
+    res.status(201).json(options);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid input data' });
+  }
+};
+
+export const mapCorrectOption = async (req, res) => {
+  try {
+    const data = correctOptionSchema.parse(req.body);
+    const correctOption = await prisma.correctOption.create({
+      data: {
+        questionId: data.questionId,
+        optionId: data.optionId
+      }
+    });
+    res.status(201).json(correctOption);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid input data' });
+  }
+};
+
 export const getAllTests = async (req, res) => {
   const tests = await prisma.test.findMany({
     where: {
@@ -109,7 +158,12 @@ export const getTestById = async (req, res) => {
         include: {
           question: {
             include: {
-              options: true
+              options: {
+                include: {
+                  option: true
+                }
+              },
+              correctOption: true
             }
           }
         }

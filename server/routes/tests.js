@@ -4,17 +4,21 @@ import {
   createTest,
   addQuestion,
   addOption,
+  addMultipleOptions,
+  mapCorrectOption,
   getAllTests,
   getTestById
 } from '../controllers/testController.js';
 
 const router = express.Router();
 
-router.post('/', auth, isAdmin, createTest);
+router.post('/create-test', auth, isAdmin, createTest);
 router.post('/questions', auth, isAdmin, addQuestion);
 router.post('/options', auth, isAdmin, addOption);
-router.get('/', auth, getAllTests);
-router.get('/:id', auth, getTestById);
+router.post('/options/multiple', auth, isAdmin, addMultipleOptions);
+router.post('/questions/correct-option', auth, isAdmin, mapCorrectOption);
+router.get('/get-tests', auth, getAllTests);
+router.get('/get-test/:id', auth, getTestById);
 
 export default router;
 
