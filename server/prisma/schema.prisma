@@ -14,7 +14,7 @@ model User {
   Email         String    @unique
   Password      String
   Role          String
-  ActiveSession Boolean @default(false)
+  ActiveSession Boolean
   Sessions      Session[] @relation("UserSessions")
   UserTests     UserTest[]
   TestsCreated  Test[]
