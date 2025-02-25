@@ -11,7 +11,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 const TestsList = () => {
   const [tests, setTests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const testsPerPage = 9; // Show 9 tests per page
+  const testsPerPage = 9;
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
@@ -20,13 +20,13 @@ const TestsList = () => {
         const response = await axios.get(`${config.API_URL}/api/tests/get-tests`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("Response : ", response.data);
+
         // Sort tests by createdAt (latest first)
         const sortedTests = response.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
 
-        setTests(sortedTests);
+        setTests(sortedTests.reverse());
       } catch (error) {
         toast.error("Error fetching tests");
       }
@@ -61,18 +61,18 @@ const TestsList = () => {
         <div className="grid grid-cols-3 gap-6 w-full  max-w-7xl mx-auto">
           {currentTests.map((test) => (
             <Link
-              key={test.TestID}
-              to={`/addques?testId=${base64Encode(test.TestID)}`}
-              className="bg-white p-8 shadow-md rounded-md border flex flex-col items-center justify-center border-gray-300 hover:shadow-2xl transition-all duration-300"
-            >
-              <h3 className="text-xl font-semibold text-gray-800">
-                {test.Title}
-              </h3>
-              <p className="text-gray-600">{test.Description}</p>
-              <p className="mt-2 text-sm text-gray-500">
-                Duration: {test.Duration} min | Marks: {test.TotalMarks}
-              </p>
-            </Link>
+            key={test.TestID}
+            to={`/test-preview/${base64Encode(test.TestID)}`} 
+            className="bg-white p-8 shadow-md rounded-md border flex flex-col items-center justify-center border-gray-300 hover:shadow-2xl transition-all duration-300"
+          >
+            <h3 className="text-xl font-semibold text-gray-800">
+              {test.Title}
+            </h3>
+            <p className="text-gray-600">{test.Description}</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Duration: {test.Duration} min | Marks: {test.TotalMarks}
+            </p>
+          </Link>
           ))}
         </div>
 

@@ -80,7 +80,7 @@ const AddQuestionsAndOptions = () => {
       );
 
       const optionIds = optionsResponse.data.map((option) => option.id);
-      const optionId = optionIds[Number(correctOption)];
+      const optionId = optionIds[Number(correctOption-1)];
 
       await axios.post(
         `${config.API_URL}/api/tests/questions/correct-option`,
@@ -181,7 +181,7 @@ const AddQuestionsAndOptions = () => {
 
           {/* Correct Option */}
           <div className="mb-4">
-            <label className="block text-gray-600">Correct Option (0-3)</label>
+            <label className="block text-gray-600">Correct Option (1-4)</label>
             <input
               type="number"
               value={correctOption}
