@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setAuth } from "../redux/slices/authSlice";
@@ -167,7 +167,7 @@ const LoginPage = () => {
               <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
                 <div className="relative h-full w-8 bg-white/20"></div>
               </div>
-              <span className="mr-4 text-xl">Sign In</span>
+              <span className="mr-4 text-xl">{!loading ? "Sign In":"Signing in..."}</span>
             </button>
             </form>
           </div>
