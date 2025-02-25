@@ -7,13 +7,13 @@ export const auth = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
-      return res.status(401).send({message: "Token not present"})
+      return res.status(401).send({ message: "Token not present" });
     }
 
     const decoded = jwt.verify(token, config.jwtSecret);
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, role: true }
+      where: { UserID: decoded.id },
+      select: { UserID: true, Role: true }
     });
 
     if (!user) {
@@ -28,7 +28,7 @@ export const auth = async (req, res, next) => {
 };
 
 export const isAdmin = (req, res, next) => {
-  if (req.user?.role !== 'ADMIN') {
+  if (req.user?.Role !== 'ADMIN') {
     return res.status(403).json({ error: 'Access denied. Admin only.' });
   }
   next();
