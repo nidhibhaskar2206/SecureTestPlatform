@@ -5,6 +5,8 @@ import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
 import Header from "../../../common/Header";
 import { Link } from "react-router-dom";
+import { encode as base64Encode } from 'js-base64';
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 const TestsList = () => {
   const [tests, setTests] = useState([]);
@@ -15,10 +17,10 @@ const TestsList = () => {
   useEffect(() => {
     const fetchTests = async () => {
       try {
-        const response = await axios.get(`${config.API_URL}/api/tests`, {
+        const response = await axios.get(`${config.API_URL}/api/tests/get-tests`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+        console.log("Response : ", response.data);
         // Sort tests by createdAt (latest first)
         const sortedTests = response.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -56,36 +58,36 @@ const TestsList = () => {
         </h2>
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6 w-full  max-w-7xl mx-auto">
           {currentTests.map((test) => (
             <Link
-              key={test.id}
-              to={'/addques'}
-              className="bg-white p-4 shadow-md rounded-md border border-gray-300 hover:shadow-lg transition-all duration-300"
+              key={test.TestID}
+              to={`/addques?testId=${base64Encode(test.TestID)}`}
+              className="bg-white p-8 shadow-md rounded-md border flex flex-col items-center justify-center border-gray-300 hover:shadow-2xl transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-gray-800">
-                {test.title}
+                {test.Title}
               </h3>
-              <p className="text-gray-600">{test.description}</p>
+              <p className="text-gray-600">{test.Description}</p>
               <p className="mt-2 text-sm text-gray-500">
-                Duration: {test.duration} min | Marks: {test.totalMarks}
+                Duration: {test.Duration} min | Marks: {test.TotalMarks}
               </p>
             </Link>
           ))}
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-center mt-6 space-x-4">
+        <div className="flex items-center justify-center mt-6 space-x-4 fixed bottom-0 w-full bg-white p-12 z-20">
           <button
             onClick={handlePrev}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-md ${
+            className={`rounded-full h-10 w-10 flex items-center justify-center  ${
               currentPage === 1
                 ? "bg-gray-300 cursor-not-allowed"
                 : "bg-orange-500 hover:bg-orange-600 text-white"
             }`}
           >
-            Prev
+            <ChevronLeftIcon className="h-5 w-5" />
           </button>
 
           <span className="text-gray-700 font-semibold">
@@ -95,13 +97,13 @@ const TestsList = () => {
           <button
             onClick={handleNext}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-md ${
+            className={`rounded-full h-10 w-10 flex items-center justify-center ${
               currentPage === totalPages
                 ? "bg-gray-300 cursor-not-allowed"
                 : "bg-orange-500 hover:bg-orange-600 text-white"
             }`}
           >
-            Next
+            <ChevronRightIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
