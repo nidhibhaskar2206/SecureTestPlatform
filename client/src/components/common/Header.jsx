@@ -16,7 +16,6 @@ export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  // console.log(auth.user.role);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -47,8 +46,8 @@ export default function Header() {
               {item.name}
             </Link>
           ))}
-          {auth?.user && auth.user.role === "ADMIN" && <Link to={'/instructions'} className="text-lg font-semibold text-orange-500">Create Test</Link>}
-          {auth?.user && auth.user.role === "uSER" && <Link to={'/test-creation'} className="text-lg font-semibold text-orange-500">Tests</Link>}
+          {auth?.user && auth.user.Role === "ADMIN" && <Link to={'/test-creation'} className="text-lg font-semibold text-orange-500">Create Test</Link>}
+          {auth?.user && auth.user.Role === "uSER" && <Link to={'/instructions'} className="text-lg font-semibold text-orange-500">Tests</Link>}
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-6">
           {auth?.user ? (

@@ -18,7 +18,7 @@ const TestsList = () => {
         const response = await axios.get(`${config.API_URL}/api/tests`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+        console.log("Responsee : ", response.data);
         // Sort tests by createdAt (latest first)
         const sortedTests = response.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -64,11 +64,11 @@ const TestsList = () => {
               className="bg-white p-4 shadow-md rounded-md border border-gray-300 hover:shadow-lg transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-gray-800">
-                {test.title}
+                {test.Title}
               </h3>
-              <p className="text-gray-600">{test.description}</p>
+              <p className="text-gray-600">{test.Description}</p>
               <p className="mt-2 text-sm text-gray-500">
-                Duration: {test.duration} min | Marks: {test.totalMarks}
+                Duration: {test.Duration} min | Marks: {test.TotalMarks}
               </p>
             </Link>
           ))}
