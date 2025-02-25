@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useSelector, useDispatch } from "react-redux";
 import { clearAuth } from "../../redux/slices/authSlice";
-import {
-  Bars3Icon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../../assets/logo_bgless.png";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -13,23 +10,20 @@ import { toast } from "react-toastify";
 const navigation = [
   { name: "About", link: "/about" },
   { name: "Contact", link: "/contact" },
-  { name: "Tests", link: "/instructions" },
-  { name: "Create Test", link: "/test-creation" },
 ];
 
 export default function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
+  // console.log(auth.user.role);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    dispatch(
-      clearAuth()
-    )
+    dispatch(clearAuth());
     toast.success("User logged out");
     navigate("/");
-  }
+  };
 
   return (
     <header className="bg-white/90">
@@ -53,6 +47,8 @@ export default function Header() {
               {item.name}
             </Link>
           ))}
+          {auth?.user && auth.user.role === "ADMIN" && <Link to={'/instructions'} className="text-lg font-semibold text-orange-500">Create Test</Link>}
+          {auth?.user && auth.user.role === "uSER" && <Link to={'/test-creation'} className="text-lg font-semibold text-orange-500">Tests</Link>}
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-6">
           {auth?.user ? (
@@ -80,7 +76,7 @@ export default function Header() {
               </Link>
               <Link
                 to="/register"
-                className="rounded-md bg-orange-500 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-orange-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="rounded-md bg-orange-500 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-orange-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 hidden lg:block"
               >
                 Sign up
               </Link>
@@ -98,7 +94,7 @@ export default function Header() {
           </button>
         </div>
       </nav>
-      <div className="h-[0.05rem] bg-orange-400 ml-60 mr-60"></div>
+      <div className="h-[0.05rem] bg-orange-400 ml-60 mr-60 opacity-0 lg:opacity-100"></div>
       <Dialog
         open={mobileMenuOpen}
         onClose={setMobileMenuOpen}

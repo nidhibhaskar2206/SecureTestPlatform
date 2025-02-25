@@ -36,9 +36,9 @@ const RegisterPage = () => {
       if (!emailRegex.test(formData.email)) {
         toast.error("Invalid email format");
         setLoading(false);
-        return; 
+        return;
       }
-  
+
       if (formData.password.length < 8) {
         toast.error("Password must contain at least 8 characters");
         setLoading(false);
@@ -56,63 +56,64 @@ const RegisterPage = () => {
       }
       if (!/\d/.test(formData.password)) {
         toast.error("Password must contain at least one number");
-        setLoading(false)
+        setLoading(false);
         return;
       }
       if (!/[!@#$%^&*]/.test(formData.password)) {
-        setLoading(false)
-        toast.error("Password must contain at least one special character (!@#$%^&*)");
+        setLoading(false);
+        toast.error(
+          "Password must contain at least one special character (!@#$%^&*)"
+        );
         return;
       }
-  
+
       const response = await axios.post(
         `${config.API_URL}/api/auth/register`,
         formData,
         { headers: { "Content-Type": "application/json" } }
       );
-  
+
       if (response.status === 201 || response.status === 200) {
         toast.success("Registration Successful!");
-        setLoading(false)
+        setLoading(false);
         navigate("/login");
-        return; 
+        return;
       }
       toast.error("Unexpected response from server");
     } catch (error) {
       console.error("Registration Error:", error);
       if (error.response && error.response.status === 400) {
         toast.error(error.response.data.error || "Invalid input data");
-        setLoading(false)
-      } 
-      else if (error.request) {
+        setLoading(false);
+      } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       }
     }
   };
-  
-  
 
   return (
-    <div className="w-screen h-[100vh] overflow-hidden">
+    <div className="w-screen min-h-screen h-auto overflow-hidden flex flex-col items-center justify-center">
       {/* Image section */}
-      <Header />
+      <div className="w-full fixed top-0 z-10">
+        <Header />
+      </div>
       <div className="flex">
-        <div className="lg:w-1/2">
+        <div className="lg:w-1/2 hidden lg:block">
           <img src={login} alt="login" className="w-full h-full" />
         </div>
         {/* Form section */}
-        <div className="lg:w-1/2 flex flex-col justify-center items-center">
+        <div className="lg:w-1/2 w-full  flex flex-col justify-center items-center my-16 md:mt-20">
           {/* Header */}
           <div className="flex flex-col items-center justify-center">
-            <div>
-              <img src={logo} alt="logo" className="w-auto h-" />
+            <div className="hidden lg:block">
+              <img src={logo} alt="logo" className="w-auto" />
             </div>
-            <div className="ml-6 mt-4 text-center text-4xl font-bold">
+            <div className="lg:ml-6 mt-4 text-center text-3xl lg:text-4xl font-bold">
               Register to Secure Test
             </div>
           </div>
           {/* Form*/}
-          <div className="mt-16 w-[70%]">
+          <div className="mt-16 w-[90%] lg:w-[70%]">
             <form
               onSubmit={handleOnSubmit}
               className="mt-6 flex w-full flex-col gap-y-4"
@@ -189,14 +190,14 @@ const RegisterPage = () => {
                 </p>
               </Link>
               <button
-              type="submit"
-              className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
-            >
-              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
-                <div className="relative h-full w-8 bg-white/20"></div>
-              </div>
-              <span className="mr-4 text-xl">Sign Up</span>
-            </button>
+                type="submit"
+                className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
+              >
+                <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
+                  <div className="relative h-full w-8 bg-white/20"></div>
+                </div>
+                <span className="mr-4 text-xl">Sign Up</span>
+              </button>
             </form>
           </div>
         </div>

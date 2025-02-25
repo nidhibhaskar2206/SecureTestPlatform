@@ -11,7 +11,6 @@ import { toast } from "react-toastify";
 import config from "../utils/config";
 
 const LoginPage = () => {
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -34,20 +33,20 @@ const LoginPage = () => {
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         toast.error("Invalid email format");
         setLoading(false);
-        return; 
+        return;
       }
       if (!formData.password) {
         toast.error("Password cannot be empty");
         setLoading(false);
         return;
       }
-  
+
       const response = await axios.post(
         `${config.API_URL}/api/auth/login`,
         formData,
@@ -55,7 +54,7 @@ const LoginPage = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-  
+
       if (response.data?.token) {
         toast.success("Login successful!");
         dispatch(setAuth(response.data));
@@ -65,12 +64,14 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-  
+
       if (error.response) {
         if (error.response.status === 400) {
           toast.error("Invalid input data. Please check your details.");
         } else if (error.response.status === 401) {
-          toast.error("Invalid credentials. Please check your email or password.");
+          toast.error(
+            "Invalid credentials. Please check your email or password."
+          );
         } else if (error.response.status === 500) {
           toast.error("Server error. Please try again later.");
         } else {
@@ -85,22 +86,23 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-  
 
   return (
-    <div className="w-[100vw] h-[100vh] overflow-hidden">
+    <div className="w-screen min-h-screen h-auto overflow-hidden flex flex-col items-center justify-center">
       {/* Image section */}
-      <Header />
+      <div className="w-full fixed top-0 z-10">
+        <Header />
+      </div>
       <div className="flex">
-        <div className="lg:w-1/2">
+        <div className="lg:w-1/2 hidden lg:block">
           <img src={login} alt="login" className="w-full h-full" />
         </div>
         {/* Form section */}
         <div className="lg:w-1/2 flex flex-col justify-center items-center">
           {/* Header */}
           <div className="flex flex-col items-center">
-            <div>
-              <img src={logo} alt="logo" className="w-auto h-" />
+            <div className="hidden lg:block">
+              <img src={logo} alt="logo" className="w-auto" />
             </div>
             <div className="ml-6 mt-4 text-center text-4xl font-bold">
               Welcome to Secure Test
@@ -161,14 +163,16 @@ const LoginPage = () => {
                 </p>
               </Link>
               <button
-              type="submit"
-              className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
-            >
-              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
-                <div className="relative h-full w-8 bg-white/20"></div>
-              </div>
-              <span className="mr-4 text-xl">{!loading ? "Sign In":"Signing in..."}</span>
-            </button>
+                type="submit"
+                className="w-full group relative inline-flex h-12 items-center justify-center overflow-hidden rounded-md bg-orange-500  px-6 font-medium text-white transition hover:shadow-[0_4px_15px_#ff9800]"
+              >
+                <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
+                  <div className="relative h-full w-8 bg-white/20"></div>
+                </div>
+                <span className="mr-4 text-xl">
+                  {!loading ? "Sign In" : "Signing in..."}
+                </span>
+              </button>
             </form>
           </div>
         </div>

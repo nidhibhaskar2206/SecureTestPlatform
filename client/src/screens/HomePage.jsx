@@ -11,12 +11,12 @@ const HomePage = () => {
       </div>
       <div className="">
         <div className="relative isolate">
-          <div className="mx-auto w-[80%] px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
-            <div className="mx-auto w-1/2 lg:mx-0 lg:flex-auto">
-              <h1 className="mt-10 text-pretty text-5xl font-semibold tracking-tight text-orange-500 sm:text-7xl ml-12">
+          <div className="mx-auto w-[90%] lg:w-[80%] px-6 py-24 sm:py-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:py-40">
+            <div className="mx-auto w-full lg:w-1/2 lg:mx-0 lg:flex-auto">
+              <h1 className="mt-10 text-pretty text-5xl font-semibold tracking-tight text-orange-500 sm:text-7xl lg:ml-12">
                 A better way to proctor your Quizzes
               </h1>
-              <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8 ml-12">
+              <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8 lg:ml-12">
                 Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
                 lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat
                 fugiat aliqua. Anim aute id magna aliqua ad ad non deserunt
@@ -34,7 +34,7 @@ const HomePage = () => {
                 </Link>
               </div>
             </div>
-            <div className="mt-16 sm:mt-24 lg:mt-0 lg:shrink-0 lg:grow w-1/2">
+            <div className="mt-16 sm:mt-24 lg:mt-0 lg:shrink-0 lg:grow w-full lg:w-1/2">
             <img src={Hero} alt="hero"></img>
             </div>
           </div>

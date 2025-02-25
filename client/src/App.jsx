@@ -13,6 +13,7 @@ import ContactPage from "./screens/Contact";
 import TestCreation from "./components/core/dashboard/tests/TestCreation";
 import AddQuestionsAndOptions from "./components/core/dashboard/tests/AddQuestionsAndAnswers";
 import TestsList from "./components/core/dashboard/tests/TestList";
+import NotFound from "./screens/NotFound";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/forget-password" element={<ForgetPage/>}/>
+        <Route path="*" element={<NotFound/>}/>
         <Route path="/instructions" element={<InstructionsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>

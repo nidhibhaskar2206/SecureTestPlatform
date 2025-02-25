@@ -13,20 +13,35 @@ const registerSchema = z.object({
   password: z.string().min(6)
 });
 
+async function testDatabaseConnection() {
+  try {
+      await prisma.$connect();
+      console.log("Database connected successfully!");
+  } catch (error) {
+      console.error("Database connection error:", error);
+  }
+}
+
+testDatabaseConnection();
+
 export const register = async (req, res) => {
   try {
+    console.log("Login Request Received:", req.body);
     const data = registerSchema.parse(req.body);
-
+    console.log("Data:", data);
+    
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email }
     });
 
+    console.log("Existing User:");
     if (existingUser) {
+      console.log("❌ User not found");
       return res.status(400).json({ status: 'error', message: 'Email already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
-
+    console.log("Hashed Password:", hashedPassword);
     const user = await prisma.user.create({
       data: {
         ...data,
@@ -47,6 +62,7 @@ export const register = async (req, res) => {
     res.status(201).json({ status: 'success', user, token });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.log("❌ Zod Error:", error);
       res.status(400).json({ status: 'error', message: 'Invalid input data', details: error.errors });
     } else {
       res.status(500).json({ status: 'error', message: 'Server error' });
