@@ -15,6 +15,7 @@ import AddQuestionsAndOptions from "./components/core/dashboard/tests/AddQuestio
 import TestsList from "./components/core/dashboard/tests/TestList";
 import NotFound from "./screens/NotFound";
 import TestPreview from "./components/core/dashboard/tests/TestPreview";
+import AssignTest from "./components/core/dashboard/tests/AssignTest";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path="/addques" element={<AddQuestionsAndOptions/>}/>
         <Route path="/testslist" element={<TestsList/>}/>
         <Route path="/test-preview/:testId" element={<TestPreview/>}/>
+        <Route path="/assign-test" element={<AssignTest/>}/>
       </Routes>
     </Provider>
   );
