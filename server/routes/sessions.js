@@ -204,7 +204,6 @@ router.post("/end/:sessionId", auth, async (req, res) => {
   }
 });
 
-
 /**
  * 🔹 Update Session Attributes
  * Endpoint: PATCH /api/session/update/:sessionId
@@ -290,6 +289,101 @@ router.get("/:sessionId", auth, async (req, res) => {
     res.json(session);
   } catch (error) {
     console.error("❌ Error in /:sessionId:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * 🔹 Save User's Question Attempt
+ * Endpoint: POST /api/session/:sessionId/attempt
+ */
+router.post("/:sessionId/attempt", auth, async (req, res) => {
+  try {
+    console.log("🔹 Received Request:", req.method, req.url);
+    console.log("🔹 Request Body:", req.body);
+
+    const sessionId = parseInt(req.params.sessionId);
+    if (isNaN(sessionId)) {
+      console.error("❌ Invalid SessionID:", req.params.sessionId);
+      return res.status(400).json({ error: "Invalid session ID" });
+    }
+
+    console.log("🔹 Checking session for ID:", sessionId);
+
+    const session = await prisma.session.findFirst({
+      where: { id: sessionId, userId: req.user.UserID },
+    });
+
+    if (!session) {
+      console.error("❌ Session not found for user:", req.user.UserID);
+      return res
+        .status(404)
+        .json({ error: "Session not found or does not belong to you" });
+    }
+
+    console.log("✅ Session found, creating attempt...");
+    const { questionId, chosenOptionId } = req.body;
+
+    const attempt = await prisma.userQuestionAttempt.create({
+      data: {
+        sessionId,
+        questionId,
+        chosenOptionId,
+        timestamp: new Date(),
+      },
+    });
+
+    console.log("✅ Attempt saved:", attempt);
+    res.status(201).json(attempt);
+  } catch (error) {
+    console.error("❌ Internal Server Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * 🔹 Get All Question Attempts for a Session
+ * Endpoint: GET /api/session/:sessionId/attempts
+ */
+router.get("/:sessionId/attempts", auth, async (req, res) => {
+  try {
+    const sessionId = parseInt(req.params.sessionId);
+    if (isNaN(sessionId)) {
+      console.error("❌ Invalid SessionID:", req.params.sessionId);
+      return res.status(400).json({ error: "Invalid session ID" });
+    }
+
+    console.log("🔹 Fetching attempts for session:", sessionId);
+
+    // Verify session exists and belongs to the user
+    const session = await prisma.session.findFirst({
+      where: { id: sessionId, userId: req.user.UserID },
+    });
+
+    if (!session) {
+      console.error("❌ Session not found for user:", req.user.UserID);
+      return res
+        .status(404)
+        .json({ error: "Session not found or does not belong to you" });
+    }
+
+    // Fetch all question attempts for this session
+    const attempts = await prisma.userQuestionAttempt.findMany({
+      where: { sessionId },
+      include: {
+        question: {
+          select: { questionText: true },
+        },
+        chosenOption: {
+          select: { optionText: true },
+        },
+      },
+    });
+
+    console.log("✅ Retrieved attempts:", attempts);
+    res.json(attempts);
+  } catch (error) {
+    console.error("❌ Error in /attempts:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
