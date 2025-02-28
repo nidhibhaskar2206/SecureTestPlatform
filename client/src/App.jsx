@@ -13,6 +13,9 @@ import ContactPage from "./screens/Contact";
 import TestCreation from "./components/core/dashboard/tests/TestCreation";
 import AddQuestionsAndOptions from "./components/core/dashboard/tests/AddQuestionsAndAnswers";
 import TestsList from "./components/core/dashboard/tests/TestList";
+import NotFound from "./screens/NotFound";
+import TestPreview from "./components/core/dashboard/tests/TestPreview";
+import AssignTest from "./components/core/dashboard/tests/AssignTest";
 
 function App() {
   return (
@@ -30,6 +33,7 @@ function App() {
       />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="*" element={<NotFound/>}/>
         <Route path="/test" element={<TestPage />} />
         <Route path="/forget-password" element={<ForgetPage/>}/>
         <Route path="/instructions" element={<InstructionsPage />} />
@@ -39,6 +43,8 @@ function App() {
         <Route path="/test-creation" element={<TestCreation/>} />
         <Route path="/addques" element={<AddQuestionsAndOptions/>}/>
         <Route path="/testslist" element={<TestsList/>}/>
+        <Route path="/test-preview/:testId" element={<TestPreview/>}/>
+        <Route path="/assign-test" element={<AssignTest/>}/>
       </Routes>
     </Provider>
   );
