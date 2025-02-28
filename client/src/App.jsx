@@ -16,6 +16,7 @@ import TestsList from "./components/core/dashboard/tests/TestList";
 import NotFound from "./screens/NotFound";
 import TestPreview from "./components/core/dashboard/tests/TestPreview";
 import AssignTest from "./components/core/dashboard/tests/AssignTest";
+import AdminDashboard from "./screens/AdminDashboard";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/test" element={<TestPage />} />
         <Route path="/forget-password" element={<ForgetPage/>}/>
         <Route path="/instructions" element={<InstructionsPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>
         <Route path="/contact" element={<ContactPage/>}/>

@@ -71,29 +71,6 @@ const AssignTest = () => {
   };
 
   return (
-    // <div>
-    //   <h2>Select Test</h2>
-    //   <select onChange={(e) => setSelectedTest(e.target.value)}>
-    //     <option value="">Select a test</option>
-    //     {tests.map((test) => (
-    //       <option key={test.TestID} value={test.TestID}>
-    //         {test.Title}
-    //       </option>
-    //     ))}
-    //   </select>
-
-    //   <h2>Select User</h2>
-    //   <select onChange={(e) => setSelectedUsers(e.target.value)}>
-    //     <option value="">Select a user</option>
-    //     {usersList.map((user) => (
-    //       <option key={user.UserID} value={user.UserID}>
-    //         {user.FirstName} {user.LastName} ({user.Email})
-    //       </option>
-    //     ))}
-    //   </select>
-
-    //   <button onClick={handleAssign}>Assign Users</button>
-    // </div>
     <div className="">
       <Header />
       <div className="flex justify-center items-center">
