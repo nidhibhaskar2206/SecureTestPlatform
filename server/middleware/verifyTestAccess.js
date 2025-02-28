@@ -2,8 +2,8 @@ import prisma from "../prisma.js";
 
 export const verifyTestAccess = async (req, res, next) => {
   try {
-    const { testId } = req.params; // Test ID from URL
-    const userId = req.user.id; // Extracted from JWT authentication
+    const { testId } = req.params;
+    const userId = req.user.id;
 
     // Check if user is assigned to this test
     const access = await prisma.userTest.findFirst({
