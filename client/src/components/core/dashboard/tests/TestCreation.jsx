@@ -45,7 +45,7 @@ const TestCreation = () => {
       setDescription("");
       setDuration("");
       setTotalMarks("");
-      navigate(`/addques?testId=${base64Encode(response?.data?.TestID)}`);
+      navigate(`/dashboard/add-ques?testId=${base64Encode(response?.data?.TestID)}`);
     } catch (error) {
       console.error("Error creating test:", error.response?.data || error.message);
       console.log(error);

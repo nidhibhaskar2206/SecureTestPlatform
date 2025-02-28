@@ -58,7 +58,7 @@ export default function Header() {
           {auth?.user ? (
             <>
               <Link
-                to="/admin-dashboard"
+                to="/dashboard"
                 className="hidden text-lg font-semibold text-orange-500 lg:block"
               >
                 Dashboard

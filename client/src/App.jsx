@@ -16,7 +16,8 @@ import TestsList from "./components/core/dashboard/tests/TestList";
 import NotFound from "./screens/NotFound";
 import TestPreview from "./components/core/dashboard/tests/TestPreview";
 import AssignTest from "./components/core/dashboard/tests/AssignTest";
-import AdminDashboard from "./screens/AdminDashboard";
+import DashboardLayout from "./screens/DashboardLayout";
+import Dashboard from "./components/core/dashboard/tests/Dashboard";
 
 function App() {
   return (
@@ -38,15 +39,17 @@ function App() {
         <Route path="/test" element={<TestPage />} />
         <Route path="/forget-password" element={<ForgetPage/>}/>
         <Route path="/instructions" element={<InstructionsPage />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage/>}/>
         <Route path="/contact" element={<ContactPage/>}/>
         <Route path="/test-creation" element={<TestCreation/>} />
-        <Route path="/addques" element={<AddQuestionsAndOptions/>}/>
-        <Route path="/testslist" element={<TestsList/>}/>
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="tests-list" element={<TestsList />} />
+          <Route path="add-ques" element={<AddQuestionsAndOptions />} />
+          <Route path="assign-test" element={<AssignTest />} />
+        </Route>
         <Route path="/test-preview/:testId" element={<TestPreview/>}/>
-        <Route path="/assign-test" element={<AssignTest/>}/>
       </Routes>
     </Provider>
   );

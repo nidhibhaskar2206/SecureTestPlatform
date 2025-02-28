@@ -11,6 +11,7 @@ const AddQuestionsAndOptions = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const encodedTestId = queryParams.get("testId");
+  console.log("encodedTestId", encodedTestId);
   const preselectedTestId = encodedTestId ? base64Decode(encodedTestId) : "";
   const [tests, setTests] = useState([]); // Available tests
   const [selectedTest, setSelectedTest] = useState(preselectedTestId || "");
@@ -111,14 +112,8 @@ const AddQuestionsAndOptions = () => {
   };
 
   return (
-    <div className="flex justify-center items-center w-screen absolute h-screen">
-       <button
-        className="absolute top-16 left-12 h-12 w-12 flex justify-center items-center bg-orange-500 rounded-full hover:bg-orange-600"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeftIcon className="text-white h-5 w-5"/>
-      </button>
-      <div className="w-full mt-10 bg-white p-6 px-60">
+    <div className="flex justify-center items-center">
+      <div className="w-full mt-10 bg-white p-6 px-40">
         <h2 className="text-5xl font-bold mb-6 text-orange-500">
           Add Test Questions & Options
         </h2>

@@ -51,14 +51,13 @@ const TestsList = () => {
 
   return (
     <div>
-      <Header />
       <div className="flex flex-col items-center">
         <h2 className="text-5xl font-bold mb-6 text-orange-500 mt-12">
           Available Tests
         </h2>
 
         {/* Grid Layout */}
-        <div className="grid grid-cols-3 gap-6 w-full  max-w-7xl mx-auto">
+        <div className="grid grid-cols-3 gap-6 w-full max-w-7xl mx-auto">
           {currentTests.map((test) => (
             <Link
             key={test.TestID}

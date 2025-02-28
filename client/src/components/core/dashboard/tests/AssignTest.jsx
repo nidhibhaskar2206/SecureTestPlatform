@@ -72,7 +72,6 @@ const AssignTest = () => {
 
   return (
     <div className="">
-      <Header />
       <div className="flex justify-center items-center">
         <div className="w-[60%] mt-20 bg-white p-6">
           <h2 className="text-5xl font-bold mb-10 text-orange-500">Assign Test</h2>
