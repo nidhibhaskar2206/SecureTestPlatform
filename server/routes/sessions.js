@@ -5,76 +5,86 @@ import { auth } from "../middleware/auth.js";
 const router = express.Router();
 
 /**
- * 🔹 Start Test Session
+ * 🔹 Start Test Session (Auto ID, Start/End Time Handling)
  * Endpoint: POST /api/session/start/:testId
  */
-router.post("/start/:testId", auth, async (req, res) => {
+router.post("/start", auth, async (req, res) => {
   try {
-    const testId = parseInt(req.params.testId);
-    console.log("✅ Received request to start session for TestID:", testId);
+    const { userId, testId, startTime } = req.body;
 
-    if (isNaN(testId)) {
-      console.error("❌ Invalid TestID:", req.params.testId);
-      return res.status(400).json({ error: "Invalid test ID" });
-    }
-
-    const test = await prisma.test.findUnique({
-      where: { TestID: testId },
-      include: {
-        UserTests: true, // ✅ Get all assigned users
-      },
-    });
-
-    // ✅ Manually check if user is assigned
-    const userAssigned = test.UserTests.some(
-      (ut) => ut.userId === req.user.UserID
+    console.log(
+      "✅ Received request to start session for TestID:",
+      testId,
+      "UserID:",
+      userId
     );
 
-    console.log("🔹 Debug: userAssigned =", userAssigned);
-
-    if (!userAssigned) {
-      console.error("❌ User not assigned to Test:", req.user.UserID);
+    // Validate inputs
+    if (!userId || !testId || !startTime) {
       return res
-        .status(403)
-        .json({ error: "You are not assigned to this test" });
+        .status(400)
+        .json({ error: "userId, testId, and startTime are required" });
     }
+
+    if (isNaN(testId) || isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid userId or testId" });
+    }
+
+    // Convert startTime to Date object
+    const startDateTime = new Date(startTime);
+    if (isNaN(startDateTime.getTime())) {
+      return res.status(400).json({ error: "Invalid startTime format" });
+    }
+
+    // ✅ Fetch the test details
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      include: { UserTests: true }, // Get all assigned users
+    });
 
     if (!test) {
       console.error("❌ Test not found for TestID:", testId);
       return res.status(404).json({ error: "Test not found" });
     }
 
-    if (test.UserTests.length === 0) {
-      console.error("❌ User not assigned to Test:", req.user.UserID);
+    // ✅ Check if user is assigned to this test
+    const userAssigned = test.UserTests.some((ut) => ut.userId === userId);
+    if (!userAssigned) {
+      console.error("❌ User not assigned to Test:", userId);
       return res
         .status(403)
         .json({ error: "You are not assigned to this test" });
     }
 
-    // Check if the user already has an active session
+    // ✅ Check if the user already has an active session
     const activeSession = await prisma.session.findFirst({
-      where: { userId: req.user.UserID, testId, status: "IN_PROGRESS" },
+      where: { userId, testId, status: "IN_PROGRESS" },
     });
 
     if (activeSession) {
-      console.error(
-        "❌ Active session already exists for User:",
-        req.user.UserID
-      );
       return res
         .status(400)
         .json({ error: "You already have an active session for this test" });
     }
 
-    console.log("✅ Creating new session...");
+    // ✅ Calculate end time using test duration
+    const endTime = new Date(startDateTime.getTime() + test.Duration * 60000);
 
+    console.log(
+      "✅ Creating new session with Start Time:",
+      startDateTime,
+      "and End Time:",
+      endTime
+    );
+
+    // ✅ Create a new session
     const session = await prisma.session.create({
       data: {
-        userId: req.user.UserID,
+        userId,
         testId,
-        status: "IN_PROGRESS",
-        startTime: new Date(),
-        endTime: new Date(Date.now() + test.Duration * 60000), // ✅ Updated duration calculation
+        status: "PENDING", // Initially pending
+        startTime: startDateTime,
+        endTime,
       },
     });
 
@@ -308,6 +318,12 @@ router.post("/:sessionId/attempt", auth, async (req, res) => {
       return res.status(400).json({ error: "Invalid session ID" });
     }
 
+    const { questionId, optionText } = req.body;
+
+    if (!questionId || !optionText) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     console.log("🔹 Checking session for ID:", sessionId);
 
     const session = await prisma.session.findFirst({
@@ -321,14 +337,32 @@ router.post("/:sessionId/attempt", auth, async (req, res) => {
         .json({ error: "Session not found or does not belong to you" });
     }
 
-    console.log("✅ Session found, creating attempt...");
-    const { questionId, chosenOptionId } = req.body;
+    console.log("✅ Session found, fetching option ID...");
 
+    // ✅ Fetch the chosen option ID based on questionId and optionText
+    const option = await prisma.option.findFirst({
+      where: {
+        optionText: optionText,
+        questionOptions: { some: { questionId: questionId } }, // Ensure it's linked to the question
+      },
+      select: { id: true },
+    });
+
+    if (!option) {
+      console.error("❌ Option not found for question:", questionId);
+      return res
+        .status(404)
+        .json({ error: "Option not found for the selected question" });
+    }
+
+    console.log("✅ Option found:", option.id);
+
+    // ✅ Save attempt in `UserQuestionAttempt` table
     const attempt = await prisma.userQuestionAttempt.create({
       data: {
         sessionId,
         questionId,
-        chosenOptionId,
+        chosenOptionId: option.id,
         timestamp: new Date(),
       },
     });
@@ -340,6 +374,7 @@ router.post("/:sessionId/attempt", auth, async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 /**
  * 🔹 Get All Question Attempts for a Session
