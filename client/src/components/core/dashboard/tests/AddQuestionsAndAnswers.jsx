@@ -3,14 +3,20 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { decode as base64Decode } from "js-base64";
 
 const AddQuestionsAndOptions = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const encodedTestId = queryParams.get("testId");
+  const preselectedTestId = encodedTestId ? base64Decode(encodedTestId) : "";
   const [tests, setTests] = useState([]); // Available tests
-  const [selectedTest, setSelectedTest] = useState(""); // Selected test ID
+  const [selectedTest, setSelectedTest] = useState(preselectedTestId || "");
   const [questionText, setQuestionText] = useState("");
   const [marks, setMarks] = useState("");
-  const [options, setOptions] = useState(["", "", "", ""]); // Store 4 options
-  const [correctOption, setCorrectOption] = useState(""); // Correct option index
+  const [options, setOptions] = useState(["", "", "", ""]);
+  const [correctOption, setCorrectOption] = useState("");
   const [loading, setLoading] = useState(false);
 
   const token = useSelector((state) => state.auth.token);
@@ -19,9 +25,12 @@ const AddQuestionsAndOptions = () => {
   useEffect(() => {
     const fetchTests = async () => {
       try {
-        const response = await axios.get(`${config.API_URL}/api/tests`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${config.API_URL}/api/tests/get-tests`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setTests(response.data);
       } catch (error) {
         toast.error("Error fetching tests");
@@ -59,27 +68,25 @@ const AddQuestionsAndOptions = () => {
       const questionId = questionResponse.data.id; // Extract question ID
 
       // Step 2: Create the 4 Options
-      const optionPromises = options.map(async (optionText) => {
-        return axios.post(
-          `${config.API_URL}/api/tests/options`,
-          {
-            questionId,
-            optionText,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      });
-
-      await Promise.all(optionPromises);
-
-      // Step 3: Map the Correct Option
-      await axios.post(
-        `${config.API_URL}/api/tests/correct-option`,
+      const optionsResponse = await axios.post(
+        `${config.API_URL}/api/tests/options/multiple`,
         {
           questionId,
-          correctOption: Number(correctOption),
+          options,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const optionIds = optionsResponse.data.map((option) => option.id);
+      const optionId = optionIds[Number(correctOption-1)];
+
+      await axios.post(
+        `${config.API_URL}/api/tests/questions/correct-option`,
+        {
+          questionId,
+          optionId,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -94,7 +101,9 @@ const AddQuestionsAndOptions = () => {
       setOptions(["", "", "", ""]);
       setCorrectOption("");
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to add question and options");
+      toast.error(
+        error.response?.data?.error || "Failed to add question and options"
+      );
     } finally {
       setLoading(false);
     }
@@ -103,7 +112,9 @@ const AddQuestionsAndOptions = () => {
   return (
     <div className="flex justify-center items-center">
       <div className="w-[60%] mt-10 bg-white p-6">
-        <h2 className="text-3xl font-bold mb-6 text-orange-500">Manage Test Questions & Options</h2>
+        <h2 className="text-5xl font-bold mb-6 text-orange-500">
+          Add Test Questions & Options
+        </h2>
 
         {/* Select Test */}
         <div className="mb-6">
@@ -115,8 +126,8 @@ const AddQuestionsAndOptions = () => {
           >
             <option value="">-- Select a Test --</option>
             {tests.map((test) => (
-              <option key={test.id} value={test.id}>
-                {test.title}
+              <option key={test.TestID} value={test.TestID}>
+                {test.Title}
               </option>
             ))}
           </select>
@@ -124,7 +135,9 @@ const AddQuestionsAndOptions = () => {
 
         {/* Add Question & Options Form */}
         <form onSubmit={handleCreateQuestionWithOptions} className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Add a Question & Options</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            Add a Question & Options
+          </h3>
 
           <div className="mb-4">
             <label className="block text-gray-600">Question Text</label>
@@ -168,7 +181,7 @@ const AddQuestionsAndOptions = () => {
 
           {/* Correct Option */}
           <div className="mb-4">
-            <label className="block text-gray-600">Correct Option (0-3)</label>
+            <label className="block text-gray-600">Correct Option (1-4)</label>
             <input
               type="number"
               value={correctOption}
@@ -187,7 +200,9 @@ const AddQuestionsAndOptions = () => {
               loading ? "bg-gray-400" : "bg-orange-500 hover:bg-orange-600"
             }`}
           >
-            {loading ? "Adding Question & Options..." : "Add Question & Options"}
+            {loading
+              ? "Adding Question & Options..."
+              : "Add Question & Options"}
           </button>
         </form>
       </div>

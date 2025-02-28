@@ -13,8 +13,6 @@ import { toast } from "react-toastify";
 const navigation = [
   { name: "About", link: "/about" },
   { name: "Contact", link: "/contact" },
-  { name: "Tests", link: "/instructions" },
-  { name: "Create Test", link: "/test-creation" },
 ];
 
 export default function Header() {
@@ -43,17 +41,19 @@ export default function Header() {
             <img alt="Logo" src={logo} className="h-10 w-30" />
           </Link>
         </div>
-        <div className="hidden lg:flex lg:gap-x-12">
+        <div className="hidden lg:flex lg:gap-x-16">
           {navigation.map((item) => (
             <Link
               key={item.name}
               to={item.link}
-              className="text-lg font-semibold text-orange-500"
+              className="text-lg font-semibold text-orange-500 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200"
             >
               {item.name}
             </Link>
           ))}
         </div>
+        {auth?.user?.Role === "ADMIN" && <Link  to={'/test-creation'} className="text-lg font-semibold text-orange-500 ml-8 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200">Create Test</Link>}
+        {auth?.user?.Role === "USER" && <Link to={'/instructions'} className="text-lg font-semibold text-orange-500 ml-8 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200">Tests</Link>}
         <div className="flex flex-1 items-center justify-end gap-x-6">
           {auth?.user ? (
             <>

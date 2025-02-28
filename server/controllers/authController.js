@@ -33,7 +33,7 @@ export const register = async (req, res) => {
         LastName: data.lastName,
         Email: data.email,
         Password: hashedPassword,
-        Role: 'USER',
+        Role: 'ADMIN',
         ActiveSession: false
       },
       select: {
@@ -210,3 +210,31 @@ export const resetPassword = async (req, res) => {
     }
   }
 };
+
+/**
+ * Fetch all users with Role === "USER"
+ * Endpoint: GET /api/users
+ */
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { Role: "USER" },
+      select: {
+        UserID: true,
+        FirstName: true,
+        LastName: true,
+        Email: true,
+        Role: true,
+      },
+    });
+
+    res.json({
+      status: "success",
+      users: users || [], // Ensure it always returns an array
+    });
+  } catch (error) {
+    console.error("❌ Error fetching users:", error);
+    res.status(500).json({ status: "error", message: "Server error" });
+  }
+};
+

@@ -4,6 +4,8 @@ import Header from "../../../common/Header";
 import { toast } from "react-toastify";
 import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { encode as base64Encode } from 'js-base64';
 
 const TestCreation = () => {
   const [title, setTitle] = useState("");
@@ -12,16 +14,16 @@ const TestCreation = () => {
   const [totalMarks, setTotalMarks] = useState("");
   const [loading, setLoading] = useState(false);
   const token = useSelector((state) => state.auth.token);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      console.log("Token",token); 
 
       const response = await axios.post(
-        `${config.API_URL}/api/tests`,
+        `${config.API_URL}/api/tests/create-test`,
         {
           title,
           description,
@@ -35,7 +37,7 @@ const TestCreation = () => {
         }
       );
 
-      console.log("Test Created:", response.data);
+      console.log("Test Created:", response.data.TestID);
       toast.success("Test Created Successfully!");
       
       // Reset form fields
@@ -43,6 +45,7 @@ const TestCreation = () => {
       setDescription("");
       setDuration("");
       setTotalMarks("");
+      navigate(`/addques?testId=${base64Encode(response?.data?.TestID)}`);
     } catch (error) {
       console.error("Error creating test:", error.response?.data || error.message);
       console.log(error);
