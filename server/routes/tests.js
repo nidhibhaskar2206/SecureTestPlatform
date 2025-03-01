@@ -18,7 +18,7 @@ router.post('/options', auth, isAdmin, addOption);
 router.post('/options/multiple', auth, isAdmin, addMultipleOptions);
 router.post('/questions/correct-option', auth, isAdmin, mapCorrectOption);
 router.get('/get-tests', auth, getAllTests);
-router.get('/get-t est/:id', auth, getTestById);
+router.get('/get-test/:id', auth, getTestById);
 
 export default router;
 

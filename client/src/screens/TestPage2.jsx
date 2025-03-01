@@ -28,7 +28,7 @@ const questions = [
   },
 ];
 
-export default function TestPage() {
+export default function TestPage2() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [violations, setViolations] = useState(0);
@@ -52,12 +52,10 @@ export default function TestPage() {
         submitExam();
       });
 
-    // Request Fullscreen Mode
-    document.documentElement.requestFullscreen().catch((err) => {
-      console.error("Error enabling fullscreen:", err);
-    });
+    // Force Fullscreen Mode
+    forceFullscreen();
 
-    // Handle Tab Switching
+    // Handle Visibility Change (Tab Switching)
     const handleVisibilityChange = () => {
       if (document.hidden) {
         handleViolation();
@@ -68,57 +66,78 @@ export default function TestPage() {
     const handleFullscreenExit = () => {
       if (!document.fullscreenElement) {
         handleViolation();
-        document.documentElement.requestFullscreen();
+        forceFullscreen();
       }
     };
 
-    // Disable Copy-Paste and Keyboard Shortcuts
-    const disableActions = (e) => {
+    // Prevent Window Resizing (Detect Shrinking)
+    const handleResize = () => {
+      if (window.innerHeight < screen.height - 100 || window.innerWidth < screen.width - 100) {
+        handleViolation();
+      }
+    };
+
+    // Prevent Developer Tools (F12, Ctrl+Shift+I, Ctrl+Shift+J)
+    const disableShortcuts = (e) => {
       if (
-        e.ctrlKey ||
-        e.metaKey ||
-        e.altKey ||
-        e.keyCode === 123 ||
-        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))
+        e.key === "Escape" || // Block ESC
+        e.keyCode === 123 || // Block F12
+        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) // Block Ctrl+Shift+I and Ctrl+Shift+J
       ) {
         e.preventDefault();
-        alert("Keyboard shortcuts are disabled.");
+        alert("Developer tools and escape key are disabled.");
+        handleViolation();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("fullscreenchange", handleFullscreenExit);
-    document.addEventListener("contextmenu", (e) => e.preventDefault());
-    document.addEventListener("keydown", disableActions);
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("keydown", disableShortcuts);
+    document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disable Right Click
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("fullscreenchange", handleFullscreenExit);
-      document.removeEventListener("keydown", disableActions);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("keydown", disableShortcuts);
     };
   }, []);
 
+  // Function to force Fullscreen Mode
+  const forceFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error("Error enabling fullscreen:", err);
+      });
+    }
+  };
+
+  // Function to handle violations
   const handleViolation = () => {
     setViolations((prev) => {
       const newCount = prev + 1;
+      alert(`Warning: Violation ${newCount}/3 detected!`);
+
       if (newCount >= 3) {
-        alert(
-          "You have violated the rules multiple times. Submitting your test."
-        );
+        alert("You have violated the rules multiple times. Submitting your test.");
         submitExam();
       }
       return newCount;
     });
   };
 
+  // Function to submit the exam
   const submitExam = () => {
     navigate("/");
   };
 
+  // Function to handle question selection
   const handleOptionClick = (option) => {
     setSelectedOption(option);
   };
 
+  // Function to move to the next question
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -130,12 +149,7 @@ export default function TestPage() {
     <div className="flex h-screen p-5 bg-gray-100 relative">
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg mx-5 flex flex-col justify-between relative">
         <div className="absolute top-4 right-4 w-32 h-24 bg-black rounded-lg overflow-hidden border border-gray-300">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full"
-          ></video>
+          <video ref={videoRef} autoPlay playsInline className="w-full h-full"></video>
         </div>
 
         <div className="mt-4 space-y-3">
@@ -147,9 +161,7 @@ export default function TestPage() {
               key={index}
               onClick={() => handleOptionClick(option)}
               className={`w-full p-3 text-left border rounded-lg transition-all ${
-                selectedOption === option
-                  ? "bg-orange-400 text-white"
-                  : "bg-gray-100"
+                selectedOption === option ? "bg-orange-400 text-white" : "bg-gray-100"
               }`}
             >
               {option}
