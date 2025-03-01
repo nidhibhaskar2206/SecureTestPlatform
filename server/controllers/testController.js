@@ -211,3 +211,28 @@ export const getAllTestOfUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export const deleteTest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const testId = parseInt(id);
+
+    // Check if the test exists
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId }
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: 'Test not found' });
+    }
+
+    // Delete the test
+    await prisma.test.delete({
+      where: { TestID: testId }
+    });
+
+    res.status(200).json({ message: 'Test deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete test' });
+  }
+};
