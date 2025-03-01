@@ -63,7 +63,7 @@ router.post("/", auth, isAdmin, async (req, res) => {
     );
 
     // ✅ Generate invite link
-    const inviteLink = `http://localhost:5174/test/${testId}?user=${userId}`;
+    const inviteLink = `http://localhost:5173/test/${testId}/user/${userId}`;
 
     // ✅ Send Email
     await sendInviteEmail(user.Email, inviteLink);
@@ -78,10 +78,6 @@ router.post("/", auth, isAdmin, async (req, res) => {
   }
 });
   
-/**
-* Get Assigned Users for a Test
-* Endpoint: GET /assign/:testId
-*/
 router.get("/:testId", async (req, res) => {
   try {
     const testId = parseInt(req.params.testId);

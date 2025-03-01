@@ -3,13 +3,15 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { decode as base64Decode } from "js-base64";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const AddQuestionsAndOptions = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const encodedTestId = queryParams.get("testId");
+  console.log("encodedTestId", encodedTestId);
   const preselectedTestId = encodedTestId ? base64Decode(encodedTestId) : "";
   const [tests, setTests] = useState([]); // Available tests
   const [selectedTest, setSelectedTest] = useState(preselectedTestId || "");
@@ -18,7 +20,7 @@ const AddQuestionsAndOptions = () => {
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctOption, setCorrectOption] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
 
   // Fetch all tests
@@ -111,11 +113,11 @@ const AddQuestionsAndOptions = () => {
 
   return (
     <div className="flex justify-center items-center">
-      <div className="w-[60%] mt-10 bg-white p-6">
+      <div className="w-full mt-10 bg-white p-6 px-40">
         <h2 className="text-5xl font-bold mb-6 text-orange-500">
           Add Test Questions & Options
         </h2>
-
+        
         {/* Select Test */}
         <div className="mb-6">
           <label className="block font-medium text-gray-600">Select Test</label>

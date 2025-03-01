@@ -10,91 +10,116 @@ const router = express.Router();
  */
 router.post("/start", auth, async (req, res) => {
   try {
-    const { userId, testId, startTime } = req.body;
+    let { userId, testId, startTime } = req.body;
 
-    console.log(
-      "✅ Received request to start session for TestID:",
-      testId,
-      "UserID:",
-      userId
-    );
+    userId = parseInt(userId);
+    testId = parseInt(testId);
 
-    // Validate inputs
+    console.log("🔹 Received request to create session for TestID:", testId, "UserID:", userId);
+
+    // Validate request inputs
     if (!userId || !testId || !startTime) {
-      return res
-        .status(400)
-        .json({ error: "userId, testId, and startTime are required" });
+      return res.status(400).json({ error: "userId, testId, and startTime are required" });
     }
 
-    if (isNaN(testId) || isNaN(userId)) {
-      return res.status(400).json({ error: "Invalid userId or testId" });
-    }
-
-    // Convert startTime to Date object
     const startDateTime = new Date(startTime);
     if (isNaN(startDateTime.getTime())) {
       return res.status(400).json({ error: "Invalid startTime format" });
     }
 
-    // ✅ Fetch the test details
+    // ✅ Fetch test details
     const test = await prisma.test.findUnique({
       where: { TestID: testId },
-      include: { UserTests: true }, // Get all assigned users
+      include: { UserTests: true },
     });
 
     if (!test) {
-      console.error("❌ Test not found for TestID:", testId);
       return res.status(404).json({ error: "Test not found" });
     }
 
     // ✅ Check if user is assigned to this test
     const userAssigned = test.UserTests.some((ut) => ut.userId === userId);
     if (!userAssigned) {
-      console.error("❌ User not assigned to Test:", userId);
-      return res
-        .status(403)
-        .json({ error: "You are not assigned to this test" });
+      return res.status(403).json({ error: "You are not assigned to this test" });
     }
 
-    // ✅ Check if the user already has an active session
-    const activeSession = await prisma.session.findFirst({
-      where: { userId, testId, status: "IN_PROGRESS" },
-    });
-
-    if (activeSession) {
-      return res
-        .status(400)
-        .json({ error: "You already have an active session for this test" });
-    }
-
-    // ✅ Calculate end time using test duration
+    // ✅ Calculate endTime based on test duration
     const endTime = new Date(startDateTime.getTime() + test.Duration * 60000);
 
-    console.log(
-      "✅ Creating new session with Start Time:",
-      startDateTime,
-      "and End Time:",
-      endTime
-    );
+    console.log("✅ Creating new session with status PENDING...");
 
-    // ✅ Create a new session
+    // ✅ Create a new session with "PENDING" status
     const session = await prisma.session.create({
       data: {
         userId,
         testId,
-        status: "PENDING", // Initially pending
+        status: "PENDING", // ✅ Initially set to PENDING
         startTime: startDateTime,
         endTime,
       },
     });
 
-    console.log("✅ Session created successfully:", session);
+    console.log("✅ Session created successfully with PENDING status:", session.id);
+
     res.status(201).json(session);
   } catch (error) {
     console.error("❌ Internal Server Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// API to update the status of the test
+router.post("/update-status", auth, async (req, res) => {
+  try {
+    let { userId, testId } = req.body;
+
+    userId = parseInt(userId);
+    testId = parseInt(testId);
+
+    console.log("🔹 Received request to update session for TestID:", testId, "UserID:", userId);
+
+    // ✅ Validate Inputs
+    if (!userId || !testId) {
+      return res.status(400).json({ error: "User ID and Test ID are required" });
+    }
+
+    // ✅ Fetch Existing Session
+    const session = await prisma.session.findFirst({
+      where: { userId, testId },
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found for this test" });
+    }
+
+    const currentTime = new Date();
+    const startTime = new Date(session.startTime);
+    const endTime = new Date(session.endTime);
+
+    let updatedStatus = session.status;
+
+    // ✅ Determine Status Based on Current Time
+    if (currentTime >= startTime && currentTime < endTime) {
+      updatedStatus = "IN_PROGRESS";
+    } else if (currentTime >= endTime) {
+      updatedStatus = "COMPLETED";
+    }
+
+    // ✅ Update the Session Status
+    const updatedSession = await prisma.session.update({
+      where: { id: session.id },
+      data: { status: updatedStatus },
+    });
+
+    res.status(200).json({ message: "Session status updated", session: updatedSession });
+  } catch (error) {
+    console.error("❌ Error updating session status:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
 
 /**
  * 🔹 Record Warning
@@ -174,6 +199,7 @@ router.post("/warning/:sessionId", auth, async (req, res) => {
  * 🔹 End Test Session
  * Endpoint: POST /api/session/end/:sessionId
  */
+
 router.post("/end/:sessionId", auth, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.sessionId);
