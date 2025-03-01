@@ -3,24 +3,23 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { decode as base64Decode } from "js-base64";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const AddQuestionsAndOptions = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const encodedTestId = queryParams.get("testId");
-  console.log("encodedTestId", encodedTestId);
   const preselectedTestId = encodedTestId ? base64Decode(encodedTestId) : "";
-  const [tests, setTests] = useState([]); // Available tests
+  const [tests, setTests] = useState([]);
   const [selectedTest, setSelectedTest] = useState(preselectedTestId || "");
   const [questionText, setQuestionText] = useState("");
   const [marks, setMarks] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctOption, setCorrectOption] = useState("");
+  const [totalMarks, setTotalMarks] = useState(0);
+  const [currentMarks, setCurrentMarks] = useState(0);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
 
   // Fetch all tests
@@ -41,6 +40,26 @@ const AddQuestionsAndOptions = () => {
     fetchTests();
   }, [token]);
 
+  // Fetch Total & Current Marks 
+  useEffect(() => {
+    if (!selectedTest) return;
+
+    const fetchMarks = async () => {
+      try {
+        const response = await axios.get(
+          `${config.API_URL}/api/tests/test-marks/${selectedTest}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setTotalMarks(response.data.TotalMarks);
+        setCurrentMarks(response.data.CurrentMarks);
+      } catch (error) {
+        toast.error("Error fetching test marks");
+      }
+    };
+
+    fetchMarks();
+  }, [selectedTest, token]);
+
   // Handle input changes for options
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
@@ -53,6 +72,13 @@ const AddQuestionsAndOptions = () => {
     e.preventDefault();
     setLoading(true);
 
+    const newMarks = Number(marks);
+    if (currentMarks + newMarks > totalMarks) {
+      toast.error(`Total marks exceeded! Max allowed: ${totalMarks}`);
+      setLoading(false);
+      return;
+    }
+
     try {
       // Step 1: Create the Question
       const questionResponse = await axios.post(
@@ -60,14 +86,14 @@ const AddQuestionsAndOptions = () => {
         {
           testId: Number(selectedTest),
           questionText,
-          marks: Number(marks),
+          marks: newMarks,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      const questionId = questionResponse.data.id; // Extract question ID
+      const questionId = questionResponse.data.id;
 
       // Step 2: Create the 4 Options
       const optionsResponse = await axios.post(
@@ -81,8 +107,9 @@ const AddQuestionsAndOptions = () => {
         }
       );
 
+      // Step 3: Assign Correct Option
       const optionIds = optionsResponse.data.map((option) => option.id);
-      const optionId = optionIds[Number(correctOption-1)];
+      const optionId = optionIds[Number(correctOption - 1)];
 
       await axios.post(
         `${config.API_URL}/api/tests/questions/correct-option`,
@@ -96,8 +123,7 @@ const AddQuestionsAndOptions = () => {
       );
 
       toast.success("Question and options added successfully!");
-
-      // Reset fields
+      setCurrentMarks((prev) => prev + newMarks);
       setQuestionText("");
       setMarks("");
       setOptions(["", "", "", ""]);
@@ -117,7 +143,7 @@ const AddQuestionsAndOptions = () => {
         <h2 className="text-5xl font-bold mb-6 text-orange-500">
           Add Test Questions & Options
         </h2>
-        
+
         {/* Select Test */}
         <div className="mb-6">
           <label className="block font-medium text-gray-600">Select Test</label>
@@ -134,6 +160,13 @@ const AddQuestionsAndOptions = () => {
             ))}
           </select>
         </div>
+
+         {/* Current & Total Marks */}
+         <p className="text-gray-700 mb-4">
+          Current Marks:{" "}
+          <span className="text-orange-500 font-semibold">{currentMarks}</span> /{" "}
+          <span className="text-orange-500 font-semibold">{totalMarks}</span>
+        </p>
 
         {/* Add Question & Options Form */}
         <form onSubmit={handleCreateQuestionWithOptions} className="mb-8">

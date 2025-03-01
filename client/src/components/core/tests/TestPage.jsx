@@ -58,7 +58,7 @@ const TestPage = () => {
             ).toLocaleString()}`
           );
         } else if (updatedSession.status === "COMPLETED") {
-          setMessage("Test has already ended. You missed it!");
+          setMessage("Test has already ended.");
         } else if (updatedSession.status === "IN_PROGRESS") {
           // Set Timer Based on Test Duration
           const endTime = new Date(updatedSession.endTime).getTime();
