@@ -29,6 +29,12 @@ const correctOptionSchema = z.object({
   optionId: z.number().min(1)
 });
 
+// Define schemas for validation
+const userActivitySchema = z.object({
+  userId: z.number().min(1),
+  testId: z.number().min(1),
+});
+
 export const createTest = async (req, res) => {
   try {
     const data = testSchema.parse(req.body);
@@ -234,5 +240,81 @@ export const deleteTest = async (req, res) => {
     res.status(200).json({ message: 'Test deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete test' });
+  }
+};
+
+export const testMarks = async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    if (isNaN(testId)) {
+      return res.status(400).json({ error: "Invalid test ID" });
+    }
+
+    // Fetch Total Marks from test
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      select: { TotalMarks: true },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    // Calculate Sum of Marks of Existing Questions
+    const currentMarks = await prisma.question.aggregate({
+      where: { tests: { some: { testId: testId } } },
+      _sum: { marks: true },
+    });
+
+    res.json({
+      TotalMarks: test.TotalMarks,
+      CurrentMarks: currentMarks._sum.marks || 0, // If no questions, set 0
+    });
+  } catch (error) {
+    console.error("❌ Error fetching test marks:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Controller function to get user activity on a particular test
+export const getUserActivityOnTest = async (req, res) => {
+  try {
+    const data = userActivitySchema.parse(req.params);
+
+    const userActivity = await prisma.userQuestionAttempt.findMany({
+      where: {
+        session: {
+          userId: data.userId,
+          testId: data.testId,
+        },
+      },
+      include: {
+        question: {
+          include: {
+            options: true,
+            correctOption: {
+              include: {
+                option: true,
+              },
+            },
+          },
+        },
+        chosenOption: true,
+      },
+    });
+
+    if (userActivity.length === 0) {
+      return res.status(404).json({ error: 'No activity found for this user on the specified test' });
+    }
+
+    const formattedActivity = userActivity.map(activity => ({
+      questionText: activity.question.questionText,
+      chosenOption: activity.chosenOption.optionText,
+      correctOption: activity.question.correctOption.option.optionText,
+    }));
+
+    res.json(formattedActivity);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid input data' });
   }
 };
