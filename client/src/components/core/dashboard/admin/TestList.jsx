@@ -3,7 +3,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
-import Header from "../../../common/Header";
 import { Link } from "react-router-dom";
 import { encode as base64Encode } from 'js-base64';
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
