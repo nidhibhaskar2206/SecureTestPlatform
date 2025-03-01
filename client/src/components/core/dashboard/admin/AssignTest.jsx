@@ -10,6 +10,7 @@ const AssignTest = () => {
   const [selectedTest, setSelectedTest] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [startTime, setStartTime] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const token = useSelector((state) => state.auth.token);
 
@@ -71,6 +72,7 @@ const AssignTest = () => {
 
     try {
       // Fetch the test details to get duration
+      setLoading(true);
       const testResponse = await axios.get(
         `${config.API_URL}/api/tests/get-test/${selectedTest}`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -107,6 +109,8 @@ const AssignTest = () => {
       setStartTime(""); // Reset start time
     } catch (error) {
       toast.error("Failed to assign test or create sessions.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -171,7 +175,7 @@ const AssignTest = () => {
           onClick={handleAssign}
           className="bg-orange-500 text-white py-2 px-4 rounded-md"
         >
-          Assign Test & Create Sessions
+          {!loading? "Assign Test & Create Sessions" : "Assigning..."}
         </button>
       </div>
     </div>
