@@ -29,6 +29,12 @@ const correctOptionSchema = z.object({
   optionId: z.number().min(1)
 });
 
+// Define schemas for validation
+const userActivitySchema = z.object({
+  userId: z.number().min(1),
+  testId: z.number().min(1),
+});
+
 export const createTest = async (req, res) => {
   try {
     const data = testSchema.parse(req.body);
@@ -267,5 +273,48 @@ export const testMarks = async (req, res) => {
   } catch (error) {
     console.error("❌ Error fetching test marks:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Controller function to get user activity on a particular test
+export const getUserActivityOnTest = async (req, res) => {
+  try {
+    const data = userActivitySchema.parse(req.params);
+
+    const userActivity = await prisma.userQuestionAttempt.findMany({
+      where: {
+        session: {
+          userId: data.userId,
+          testId: data.testId,
+        },
+      },
+      include: {
+        question: {
+          include: {
+            options: true,
+            correctOption: {
+              include: {
+                option: true,
+              },
+            },
+          },
+        },
+        chosenOption: true,
+      },
+    });
+
+    if (userActivity.length === 0) {
+      return res.status(404).json({ error: 'No activity found for this user on the specified test' });
+    }
+
+    const formattedActivity = userActivity.map(activity => ({
+      questionText: activity.question.questionText,
+      chosenOption: activity.chosenOption.optionText,
+      correctOption: activity.question.correctOption.option.optionText,
+    }));
+
+    res.json(formattedActivity);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid input data' });
   }
 };

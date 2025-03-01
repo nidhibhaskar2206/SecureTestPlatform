@@ -10,7 +10,8 @@ import {
   getTestById,
   getAllTestOfUser,
   deleteTest,
-  testMarks
+  testMarks,
+  getUserActivityOnTest
 } from '../controllers/testController.js';
 
 const router = express.Router();
@@ -26,5 +27,6 @@ router.get('/user/:userId', auth, getAllTestOfUser);
 router.delete('/delete-test/:id', auth, deleteTest);
 router.get("/test-marks/:testId", auth, testMarks);
 
+router.get('/user/:userId/test/:testId/activity', getUserActivityOnTest);
 
 export default router;
