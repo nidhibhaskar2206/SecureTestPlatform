@@ -143,7 +143,10 @@ const AddQuestionsAndOptions = () => {
         <h2 className="text-5xl font-bold mb-6 text-orange-500">
           Add Test Questions & Options
         </h2>
-
+        {(currentMarks === totalMarks && currentMarks!== 0) ? (
+          <div className="text-3xl font-extrabold mt-12">No more questions can be added</div>
+        ) : (
+          <>
         {/* Select Test */}
         <div className="mb-6">
           <label className="block font-medium text-gray-600">Select Test</label>
@@ -240,6 +243,9 @@ const AddQuestionsAndOptions = () => {
               : "Add Question & Options"}
           </button>
         </form>
+        </>
+        )}
+        
       </div>
     </div>
   );
