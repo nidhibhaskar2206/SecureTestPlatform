@@ -6,6 +6,7 @@ import config from "../../../../utils/config";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { encode as base64Encode } from 'js-base64';
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 const TestCreation = () => {
   const [title, setTitle] = useState("");
