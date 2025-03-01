@@ -33,7 +33,7 @@ export const register = async (req, res) => {
         LastName: data.lastName,
         Email: data.email,
         Password: hashedPassword,
-        Role: 'ADMIN',
+        Role: 'USER',
         ActiveSession: false
       },
       select: {

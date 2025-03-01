@@ -17,10 +17,7 @@ const HomePage = () => {
                 A better way to proctor your Quizzes
               </h1>
               <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl/8 ml-12">
-                Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
-                lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat
-                fugiat aliqua. Anim aute id magna aliqua ad ad non deserunt
-                sunt.
+              SecureTest provides a seamless and secure environment for conducting online exams. Whether you're a student, a professional, or an organization, we ensure fairness, security, and accuracy in every test.
               </p>
               <div className="mt-10 flex items-center gap-x-6 ml-12">
                 <Link

@@ -119,7 +119,36 @@ router.post("/update-status", auth, async (req, res) => {
 });
 
 
+router.get("/check-assignment/:testId", auth, async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    const userId = req.user.UserID; 
 
+    if (isNaN(testId)) {
+      return res.status(400).json({ error: "Invalid test ID" });
+    }
+
+    console.log(`🔹 Checking if User ${userId} is assigned to Test ${testId}`);
+
+    // Fetch user assignment
+    const userTest = await prisma.userTest.findFirst({
+      where: { testId, userId },
+    });
+
+    if (!userTest) {
+      return res.status(403).json({
+        error: "This test is not assigned to you.",
+      });
+    }
+
+    res.status(200).json({
+      message: "You are assigned to this test. Proceed further.",
+    });
+  } catch (error) {
+    console.error("❌ Error in checking assignment:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 /**
  * 🔹 Record Warning
@@ -305,29 +334,40 @@ router.patch("/update/:sessionId", auth, async (req, res) => {
  * 🔹 Get Session Details
  * Endpoint: GET /api/session/:sessionId
  */
-router.get("/:sessionId", auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
-    const sessionId = parseInt(req.params.sessionId);
-    if (isNaN(sessionId)) {
-      console.error("❌ Invalid SessionID:", req.params.sessionId);
-      return res.status(400).json({ error: "Invalid session ID" });
+    const { sessionId, userId, testId } = req.query;
+
+    let session;
+
+    if (sessionId) {
+      // ✅ Fetch session by sessionId
+      session = await prisma.session.findUnique({
+        where: { id: parseInt(sessionId) },
+      });
+    } else if (userId && testId) {
+      // ✅ Fetch session by userId & testId
+      session = await prisma.session.findFirst({
+        where: {
+          userId: parseInt(userId),
+          testId: parseInt(testId),
+        },
+      });
+    } else {
+      return res.status(400).json({ error: "Provide sessionId or userId & testId" });
     }
 
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-    });
-
     if (!session) {
-      console.error("❌ Session not found:", sessionId);
       return res.status(404).json({ error: "Session not found" });
     }
 
     res.json(session);
   } catch (error) {
-    console.error("❌ Error in /:sessionId:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("❌ Error fetching session details:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 /**
  * 🔹 Save User's Question Attempt
@@ -448,5 +488,8 @@ router.get("/:sessionId/attempts", auth, async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+
 
 export default router;
