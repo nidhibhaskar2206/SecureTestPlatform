@@ -56,7 +56,7 @@ export default function Header() {
           ))}
         </div>
         {auth?.user?.Role === "ADMIN" && <Link  to={'/test-creation'} className="text-lg font-semibold text-orange-500 ml-8 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200">Create Test</Link>}
-        {auth?.user?.Role === "USER" && <Link to={'/instructions'} className="text-lg font-semibold text-orange-500 ml-8 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200">Tests</Link>}
+        {auth?.user?.Role === "USER" && <Link to={'/dashboard-user/tests-list'} className="text-lg font-semibold text-orange-500 ml-8 p-2 hover:bg-orange-500 hover:text-white rounded transition-all duration-200">Tests</Link>}
         <div className="flex flex-1 items-center justify-end gap-x-6">
           {auth?.user ? (
             <>
