@@ -236,3 +236,36 @@ export const deleteTest = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete test' });
   }
 };
+
+export const testMarks = async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    if (isNaN(testId)) {
+      return res.status(400).json({ error: "Invalid test ID" });
+    }
+
+    // Fetch Total Marks from test
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      select: { TotalMarks: true },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    // Calculate Sum of Marks of Existing Questions
+    const currentMarks = await prisma.question.aggregate({
+      where: { tests: { some: { testId: testId } } },
+      _sum: { marks: true },
+    });
+
+    res.json({
+      TotalMarks: test.TotalMarks,
+      CurrentMarks: currentMarks._sum.marks || 0, // If no questions, set 0
+    });
+  } catch (error) {
+    console.error("❌ Error fetching test marks:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

@@ -9,7 +9,8 @@ import {
   getAllTests,
   getTestById,
   getAllTestOfUser,
-  deleteTest
+  deleteTest,
+  testMarks
 } from '../controllers/testController.js';
 
 const router = express.Router();
@@ -23,5 +24,7 @@ router.get('/get-tests', auth, getAllTests);
 router.get('/get-test/:id', auth, getTestById);
 router.get('/user/:userId', auth, getAllTestOfUser);
 router.delete('/delete-test/:id', auth, deleteTest);
+router.get("/test-marks/:testId", auth, testMarks);
+
 
 export default router;
