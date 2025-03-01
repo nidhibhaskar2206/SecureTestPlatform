@@ -21,11 +21,12 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const userRole = useSelector((state) => state.auth.role);
-
+  const auth = useSelector((state) => state.auth);
+  const userRole = auth?.user?.Role;
+  console.log(userRole);
   const adminNavigation = [
     { name: "Dashboard", path: "/dashboard-admin", icon: HomeIcon },
-    { name: "Tests", path: "/dashboard-admin/tests-list", icon: CircleStackIcon },
+    { name: "Tests", path: "/dashboard-admin/test-list", icon: CircleStackIcon },
     { name: "Add Questions", path: "/dashboard-admin/add-ques", icon: CiEdit },
     { name: "Assign Test", path: "/dashboard-admin/assign-test", icon: PlusIcon },
   ];

@@ -75,7 +75,7 @@ function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
-          <Route path="tests-list" element={<TestList />} />
+          <Route path="test-list" element={<TestList />} />
           <Route path="add-ques" element={<AddQuestionsAndOptions />} />
           <Route path="assign-test" element={<AssignTest />} />
           <Route path="test-creation" element={<TestCreation />} />
