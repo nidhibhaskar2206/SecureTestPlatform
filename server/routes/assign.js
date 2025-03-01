@@ -15,6 +15,7 @@ router.get("/test", (req, res) => {
 *  Assign a User to a Test and send Invite
 * Endpoint: POST /assign
 */
+
 router.post("/", auth, isAdmin, async (req, res) => {
   const { userId, testId } = req.body;
 

@@ -7,7 +7,9 @@ import {
   addMultipleOptions,
   mapCorrectOption,
   getAllTests,
-  getTestById
+  getTestById,
+  getAllTestOfUser,
+  deleteTest
 } from '../controllers/testController.js';
 
 const router = express.Router();
@@ -19,6 +21,8 @@ router.post('/options/multiple', auth, isAdmin, addMultipleOptions);
 router.post('/questions/correct-option', auth, isAdmin, mapCorrectOption);
 router.get('/get-tests', auth, getAllTests);
 router.get('/get-test/:id', auth, getTestById);
+router.get('/user/:userId', auth, getAllTestOfUser);
+router.delete('/delete-test/:id', auth, deleteTest);
 
 export default router;
 

@@ -29,6 +29,9 @@ export default function Header() {
     navigate("/");
   }
 
+  const dashboardLink =
+  auth?.user?.Role === "ADMIN" ? "/dashboard-admin" : "/dashboard-user";
+
   return (
     <header className="bg-white/90">
       <nav
@@ -58,7 +61,7 @@ export default function Header() {
           {auth?.user ? (
             <>
               <Link
-                to="/dashboard"
+                to={dashboardLink}
                 className="hidden text-lg font-semibold text-orange-500 lg:block"
               >
                 Dashboard

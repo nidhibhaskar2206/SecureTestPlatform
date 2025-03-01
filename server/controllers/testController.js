@@ -180,3 +180,59 @@ export const getTestById = async (req, res) => {
 
   res.json(test);
 };
+
+export const getAllTestOfUser = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Fetch tests where the user is assigned
+    const assignedTests = await prisma.test.findMany({
+      where: {
+        UserTests: {
+          some: {
+            userId: userId
+          }
+        }
+      },
+      include: {
+        creator: {
+          select: { FirstName: true, LastName: true }
+        }
+      }
+    });
+
+    res.json(assignedTests);
+  } catch (error) {
+    console.error("❌ Error fetching user tests:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export const deleteTest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const testId = parseInt(id);
+
+    // Check if the test exists
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId }
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: 'Test not found' });
+    }
+
+    // Delete the test
+    await prisma.test.delete({
+      where: { TestID: testId }
+    });
+
+    res.status(200).json({ message: 'Test deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete test' });
+  }
+};
