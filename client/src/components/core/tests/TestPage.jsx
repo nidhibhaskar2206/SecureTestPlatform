@@ -21,7 +21,17 @@ const TestPage = () => {
   useEffect(() => {
     const fetchTestDetailsAndUpdateSession = async () => {
       try {
-        // ✅ Fetch Test Details
+        const assignRes = await axios.get(
+          `${config.API_URL}/api/sessions/check-assignment/${testId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+        if (assignRes.data.error) {
+          setMessage(assignRes.data.error);
+          return;
+        }
+        
+        // Fetch Test Details
         const response = await axios.get(
           `${config.API_URL}/api/tests/get-test/${testId}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -30,7 +40,7 @@ const TestPage = () => {
         setTest(response.data);
         setQuestions(response.data.Questions.map((q) => q.question));
   
-        // ✅ Update Session Status
+        // Update Session Status
         const statusRes = await axios.post(
           `${config.API_URL}/api/sessions/update-status`,
           { userId, testId },
@@ -40,7 +50,7 @@ const TestPage = () => {
         const updatedSession = statusRes.data.session;
         setSession(updatedSession);
   
-        // ✅ Handle different session statuses
+        // Handle different session statuses
         if (updatedSession.status === "PENDING") {
           setMessage(
             `Test has not started yet. It will start at ${new Date(
@@ -50,7 +60,7 @@ const TestPage = () => {
         } else if (updatedSession.status === "COMPLETED") {
           setMessage("Test has already ended. You missed it!");
         } else if (updatedSession.status === "IN_PROGRESS") {
-          // ✅ Set Timer Based on Test Duration
+          // Set Timer Based on Test Duration
           const endTime = new Date(updatedSession.endTime).getTime();
           const now = new Date().getTime();
           setTimeLeft(Math.max(0, Math.floor((endTime - now) / 1000)));

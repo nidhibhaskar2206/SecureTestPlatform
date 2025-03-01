@@ -119,6 +119,36 @@ router.post("/update-status", auth, async (req, res) => {
 });
 
 
+router.get("/check-assignment/:testId", auth, async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    const userId = req.user.UserID; 
+
+    if (isNaN(testId)) {
+      return res.status(400).json({ error: "Invalid test ID" });
+    }
+
+    console.log(`🔹 Checking if User ${userId} is assigned to Test ${testId}`);
+
+    // Fetch user assignment
+    const userTest = await prisma.userTest.findFirst({
+      where: { testId, userId },
+    });
+
+    if (!userTest) {
+      return res.status(403).json({
+        error: "This test is not assigned to you.",
+      });
+    }
+
+    res.status(200).json({
+      message: "You are assigned to this test. Proceed further.",
+    });
+  } catch (error) {
+    console.error("❌ Error in checking assignment:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 
 /**
