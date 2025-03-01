@@ -28,7 +28,7 @@ const questions = [
   },
 ];
 
-export default function TestPage() {
+export default function TestPage2() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [violations, setViolations] = useState(0);
