@@ -37,7 +37,7 @@ const Dashboard = () => {
       {
         label: 'Tests Per User',
         data: testsPerUser.map((user) => user._count.testId),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        backgroundColor: 'rgba(249, 115, 22, 0.8)',
       },
     ],
   };
@@ -59,31 +59,52 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-4 text-center">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold mb-2">Total Tests Created: {totalTests}</h2>
-          <h2 className="text-2xl font-semibold">Total Users: {totalUsers}</h2>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-semibold mb-2">Tests Assigned to Users:</h3>
-          <ul className="list-disc list-inside">
-            {testsAssigned.map((assignment) => (
-              <li key={`${assignment.userId}-${assignment.testId}`}>
-                {assignment.user.FirstName} {assignment.user.LastName} is assigned to {assignment.test.Title}
-              </li>
-            ))}
-          </ul>
-        </div>
+    <div className="container mx-auto p-6">
+    <h1 className="text-4xl font-bold text-orange-500 text-center mb-6">
+      Dashboard
+    </h1>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Total Tests & Users */}
+      <div className="bg-white rounded-lg shadow-md p-6 border-l-8 border-orange-500">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Total Tests Created:
+          <span className="text-orange-500 ml-2">{totalTests}</span>
+        </h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mt-2">
+          Total Users:
+          <span className="text-orange-500 ml-2">{totalUsers}</span>
+        </h2>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mt-4">
-        <h3 className="text-xl font-semibold mb-2">Tests Per User:</h3>
-        <Bar data={testsPerUserData} options={options} />
+      {/* Tests Assigned to Users */}
+      <div className="bg-white rounded-lg shadow-md p-6 border-l-8 border-orange-500">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          Tests Assigned:
+        </h3>
+        <ul className="list-disc list-inside text-gray-600">
+          {testsAssigned.map((assignment) => (
+            <li key={`${assignment.userId}-${assignment.testId}`}>
+              <span className="text-orange-500 font-medium">
+                {assignment.user.FirstName} {assignment.user.LastName}
+              </span>{" "}
+              is assigned to{" "}
+              <span className="text-orange-500 font-medium">
+                {assignment.test.Title}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
+
+    {/* Bar Chart - Tests Per User */}
+    <div className="bg-white rounded-lg shadow-md p-6 mt-6 border-l-8 border-orange-500">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4">
+        Tests Per User:
+      </h3>
+      <Bar data={testsPerUserData} options={options} />
+    </div>
+  </div>
   );
 };
 
