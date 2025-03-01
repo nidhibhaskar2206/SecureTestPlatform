@@ -137,7 +137,7 @@ const TestPage = () => {
         Time Left: {Math.floor(timeLeft / 60)}:{timeLeft % 60}
       </div>
 
-      <div className="w-full max-w-2xl bg-white p-6 mt-6 rounded-lg shadow-md">
+      <div className="w-full max-w-7xl bg-white p-6 mt-6 rounded-lg shadow-md">
         {questions.map((question, index) => (
           <div key={question.id} className="mb-6">
             <h2 className="text-lg font-semibold">{index + 1}. {question.questionText}</h2>

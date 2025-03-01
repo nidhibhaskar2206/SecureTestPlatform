@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { encode as base64Encode } from 'js-base64';
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-const TestsList = () => {
+const TestList = () => {
   const [tests, setTests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const testsPerPage = 9;
@@ -110,4 +110,4 @@ const TestsList = () => {
   );
 };
 
-export default TestsList;
+export default TestList;

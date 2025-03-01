@@ -180,3 +180,34 @@ export const getTestById = async (req, res) => {
 
   res.json(test);
 };
+
+export const getAllTestOfUser = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Fetch tests where the user is assigned
+    const assignedTests = await prisma.test.findMany({
+      where: {
+        UserTests: {
+          some: {
+            userId: userId
+          }
+        }
+      },
+      include: {
+        creator: {
+          select: { FirstName: true, LastName: true }
+        }
+      }
+    });
+
+    res.json(assignedTests);
+  } catch (error) {
+    console.error("❌ Error fetching user tests:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}

@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 import store from "./redux/store";
 import TestPage2 from "./screens/TestPage2";
 import HomePage from "./screens/HomePage";
@@ -12,13 +13,32 @@ import "react-toastify/dist/ReactToastify.css";
 import ContactPage from "./screens/Contact";
 import TestCreation from "./components/core/dashboard/tests/TestCreation";
 import AddQuestionsAndOptions from "./components/core/dashboard/tests/AddQuestionsAndAnswers";
-import TestsList from "./components/core/dashboard/tests/TestList";
+import TestList from "./components/core/dashboard/tests/TestList";
+import TestsList from "./components/core/dashboard/user/TestsList";
 import TestPage from "./components/core/tests/TestPage";
 import NotFound from "./screens/NotFound";
 import TestPreview from "./components/core/dashboard/tests/TestPreview";
 import AssignTest from "./components/core/dashboard/tests/AssignTest";
 import DashboardLayout from "./screens/DashboardLayout";
-import Dashboard from "./components/core/dashboard/tests/Dashboard";
+import AdminDashboard from "./components/core/dashboard/tests/AdminDashboard";
+import UserDashboard from "./components/core/dashboard/user/UserDashboard";
+import UserHistory from "./components/core/dashboard/user/UserHistory";
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const auth = useSelector((state) => state.auth);
+  const token = auth?.token;
+  const userRole = auth?.user?.Role;
+  console.log(userRole, token);
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  if (!allowedRoles.includes(userRole)) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
@@ -45,13 +65,43 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/test-creation" element={<TestCreation />} />
         <Route path="/test/:testId/user/:userId" element={<TestPage />} />
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="tests-list" element={<TestsList />} />
+
+        <Route
+          path="/dashboard-admin"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="tests-list" element={<TestList />} />
           <Route path="add-ques" element={<AddQuestionsAndOptions />} />
           <Route path="assign-test" element={<AssignTest />} />
+          <Route path="test-creation" element={<TestCreation />} />
         </Route>
-        <Route path="/test-preview/:testId" element={<TestPreview />} />
+
+        <Route
+          path="/dashboard-user"
+          element={
+            <ProtectedRoute allowedRoles={["USER"]}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<UserDashboard />} />
+          <Route path="tests-list" element={<TestsList />} />
+          <Route path="user-history" element={<UserHistory />} />
+        </Route>
+
+        <Route
+          path="/test-preview/:testId"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <TestPreview />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Provider>
   );

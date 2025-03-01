@@ -4,17 +4,14 @@ import {
   Bars3Icon,
   HomeIcon,
   CircleStackIcon,
-  PlusIcon
+  PlusIcon,
+  ClipboardDocumentListIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import Logo from "../assets/logo_bgless.png";
 import { CiEdit} from "react-icons/ci";
+import { useSelector } from "react-redux";
 
-const navigation = [
-  { name: "Dashboard", path: "/dashboard", icon: HomeIcon },
-  {name: 'Tests' , path:"/dashboard/tests-list", icon: CircleStackIcon},
-  {name: "Add Questions" , path:"/dashboard/add-ques", icon: CiEdit},
-  { name: "Assign Test", path: "/dashboard/assign-test", icon: PlusIcon },
-];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -24,6 +21,22 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const userRole = useSelector((state) => state.auth.role);
+
+  const adminNavigation = [
+    { name: "Dashboard", path: "/dashboard-admin", icon: HomeIcon },
+    { name: "Tests", path: "/dashboard-admin/tests-list", icon: CircleStackIcon },
+    { name: "Add Questions", path: "/dashboard-admin/add-ques", icon: CiEdit },
+    { name: "Assign Test", path: "/dashboard-admin/assign-test", icon: PlusIcon },
+  ];
+
+  const userNavigation = [
+    { name: "Dashboard", path: "/dashboard-user", icon: HomeIcon },
+    { name: "Tests Assigned", path: "/dashboard-user/tests-list", icon: ClipboardDocumentListIcon },
+    { name: "Test History", path: "/dashboard-user/user-history", icon: ClockIcon },
+  ];
+  
+  const navigation = userRole === "ADMIN" ? adminNavigation : userNavigation;
 
   return (
     <div className="flex h-screen overflow-hidden">
