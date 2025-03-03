@@ -22,6 +22,7 @@ import DashboardLayout from "./screens/DashboardLayout";
 import AdminDashboard from "./components/core/dashboard/admin/AdminDashboard";
 import UserDashboard from "./components/core/dashboard/user/UserDashboard";
 import UserHistory from "./components/core/dashboard/user/UserHistory";
+import TestSummaryPage from "./components/core/tests/TestsSummary";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const auth = useSelector((state) => state.auth);
@@ -101,6 +102,12 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/test/:testId/user/:userId/summary"
+          element={
+            <ProtectedRoute allowedRoles={["USER"]}>
+              <TestSummaryPage/>
+            </ProtectedRoute>
+          }/>
       </Routes>
     </Provider>
   );

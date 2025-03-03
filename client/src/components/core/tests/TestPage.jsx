@@ -162,7 +162,24 @@ const TestPage = () => {
 
   // ✅ Submit Test
   const handleSubmit = async () => {
+    
     try {
+      if (!session?.id) {
+        toast.error("Session not found! Please reload and try again.");
+        return;
+      }
+
+      const answerPayload = Object.keys(answers).map((questionId) => ({
+        questionId: parseInt(questionId),
+        selectedOptionId: answers[questionId],
+      }));
+
+      await axios.post(
+        `${config.API_URL}/api/sessions/session/${session.id}/answers`,
+        { answers: answerPayload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
       await axios.post(
         `${config.API_URL}/api/sessions/end/${session.id}`,
         { score: calculateScore() },
@@ -170,7 +187,7 @@ const TestPage = () => {
       );
 
       toast.success("Test submitted successfully!");
-      navigate("/");
+      navigate(`/test/${testId}/user/${userId}/summary`);
     } catch (error) {
       toast.error("Error submitting the test.");
     }
@@ -192,7 +209,7 @@ const TestPage = () => {
 
   if (message) {
     return (
-      <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+      <div className="flex flex-col items-center p-6 min-h-screen">
         <h1 className="text-3xl font-bold text-orange-500">{test?.Title}</h1>
         <p className="text-lg text-gray-600 mt-2">{test?.Description}</p>
         <div className="text-red-500 font-bold text-xl mt-2">{message}</div>
@@ -201,7 +218,7 @@ const TestPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+    <div className="flex flex-col items-center p-6 min-h-screen">
       <h1 className="text-3xl font-bold text-orange-500">{test.Title}</h1>
       <p className="text-lg text-gray-600 mt-2">{test.Description}</p>
 

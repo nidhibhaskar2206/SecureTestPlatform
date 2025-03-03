@@ -10,6 +10,7 @@ import {
   updateSession,
   updateStatus,
   warning,
+  answerAttempt,
 } from "../controllers/sessionController.js";
 const router = express.Router();
 
@@ -31,5 +32,8 @@ router.get("/", auth, getSession);
 router.post("/:sessionId/attempt", auth, attemptSession);
 
 router.get("/:sessionId/attempts", auth, attempts);
+
+router.post("/session/:sessionId/answers", auth, answerAttempt);
+
 
 export default router;
