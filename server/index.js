@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import { config } from './config.js';
 import authRoutes from './routes/auth.js';
 import testRoutes from './routes/tests.js';
@@ -7,8 +8,10 @@ import sessionRoutes from './routes/sessions.js';
 import dashboardRoutes from './routes/dashboard.js';
 import assignRoutes from './routes/assign.js';
 
+
 const app = express();
 
+app.use(morgan("dev"));
 app.use(
   cors({
     origin: config.corsOrigin,
@@ -16,6 +19,7 @@ app.use(
   })
 );
 app.use(express.json());
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/sessions', sessionRoutes);
