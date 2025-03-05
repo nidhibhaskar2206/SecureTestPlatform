@@ -10,4 +10,4 @@ services:
       MYSQL_USER: sajal
       MYSQL_PASSWORD: merai@Iui1234
     ports:
-      - "3308:3308"
+      - "3306:3306"

@@ -7,4 +7,4 @@ ENV MYSQL_USER=sajal
 ENV MYSQL_PASSWORD=merai@Iui1234
 
 # Expose the MySQL port
-EXPOSE 3308
+EXPOSE 3306
