@@ -10,6 +10,7 @@ import { useProctoring } from "../../../hooks/useProctoring";
 import { useDevToolDetection } from "../../../hooks/useDevToolDetection";
 import { useCamDetection } from "../../../hooks/useCamDetection";
 import { useFullScreenDetection } from "../../../hooks/useFullScreenDetection";
+import { BarLoader } from "../../common/Loader";
 
 const TestPage = () => {
   const { testId, userId } = useParams();
@@ -212,7 +213,7 @@ const TestPage = () => {
     return score;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen"><BarLoader/></div>;
 
   if (message) {
     return (
