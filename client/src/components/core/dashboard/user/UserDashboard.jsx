@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import config from "../../../../utils/config";
+import { BarLoader } from '../../../common/Loader';
 
 const UserDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -25,7 +26,7 @@ const UserDashboard = () => {
   }, [token]);
 
   if (!dashboardData) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen"><BarLoader/></div>;
   }
 
   const { assignedTests, upcomingTests, testAttempts, proctoringWarnings, sessionDetails } = dashboardData;

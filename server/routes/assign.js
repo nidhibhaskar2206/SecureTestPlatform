@@ -3,6 +3,7 @@ import { auth, isAdmin } from "../middleware/auth.js";
 import {
   assignTest,
   getAllUsersOfATest,
+  getAttemptedTestsByUser
 } from "../controllers/assignController.js";
 
 const router = express.Router();
@@ -12,7 +13,7 @@ router.get("/test", (req, res) => {
 });
 
 router.post("/", auth, isAdmin, assignTest);
-
 router.get("/:testId", getAllUsersOfATest);
+router.get('/attempted-tests/:userId', getAttemptedTestsByUser);
 
 export default router;

@@ -95,3 +95,33 @@ export const getAllUsersOfATest = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+/**
+ * Fetch tests attempted by a user
+ * Endpoint: GET /attempted-tests/:userId
+ */
+export const getAttemptedTestsByUser = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    if (isNaN(userId)) return res.status(400).json({ error: "Invalid user ID" });
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({ where: { UserID: userId } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Get all tests attempted by the user
+    const attemptedTests = await prisma.session.findMany({
+      where: { userId, NOT: { score: null } },
+      include: {
+        test: {
+          select: { TestID: true, Title: true, Description: true, Duration: true, TotalMarks: true },
+        },
+      },
+    });
+
+    res.json({ userId, attemptedTests });
+  } catch (error) {
+    console.error("Error fetching attempted tests:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

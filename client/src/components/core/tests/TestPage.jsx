@@ -4,6 +4,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import config from "../../../utils/config";
 import { toast } from "react-toastify";
+import { BarLoader } from "../../common/Loader";
 
 const TestPage = () => {
   const { testId, userId } = useParams();
@@ -17,29 +18,6 @@ const TestPage = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
   const [message, setMessage] = useState("");
-
-  const videoRef = useRef(null);
-  const [cameraAllowed, setCameraAllowed] = useState(false);
-  const [cameraError, setCameraError] = useState("");
-  const [cameraPosition, setCameraPosition] = useState({ top: 10, right: 10 });
-  const [dragging, setDragging] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          setCameraAllowed(true);
-        }
-      } catch (error) {
-        setCameraError("Camera access is required to take the test.");
-      }
-    };
-
-    startCamera();
-  }, []);
 
   useEffect(() => {
     const fetchTestDetailsAndUpdateSession = async () => {
@@ -109,42 +87,6 @@ const TestPage = () => {
     }
   }, [timeLeft, session]);
 
-  useEffect(() => {
-    if (dragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    } else {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [dragging]);
-
-  const handleMouseDown = (e) => {
-    setDragging(true);
-    setOffset({
-      x: e.clientX - cameraPosition.right,
-      y: e.clientY - cameraPosition.top,
-    });
-  };
-
-  const handleMouseMove = (e) => {
-    if (dragging) {
-      setCameraPosition({
-        top: e.clientY - offset.y,
-        right: window.innerWidth - e.clientX - offset.x,
-      });
-    }
-  };
-
-  const handleMouseUp = () => {
-    setDragging(false);
-  };
-
   const handleSelectOption = (questionId, optionId) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
@@ -175,7 +117,7 @@ const TestPage = () => {
     return score;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen"><BarLoader/></div>;
 
   // Show message if test has not started or already ended
   if (message) {
@@ -190,19 +132,6 @@ const TestPage = () => {
 
   return (
     <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
-      {cameraAllowed && (
-        <div
-          className="fixed cursor-move"
-          style={{ top: cameraPosition.top, right: cameraPosition.right }}
-          onMouseDown={handleMouseDown}
-        >
-          <video ref={videoRef} autoPlay muted className="w-48 h-36 rounded-lg shadow-lg"></video>
-        </div>
-      )}
-
-      {cameraError && (
-        <div className="text-red-500 font-bold text-xl mt-2">{cameraError}</div>
-      )}
       <h1 className="text-3xl font-bold text-orange-500">{test.Title}</h1>
       <p className="text-lg text-gray-600 mt-2">{test.Description}</p>
       <div className="text-red-500 font-bold text-xl mt-2">
