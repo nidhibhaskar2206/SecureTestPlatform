@@ -47,6 +47,13 @@ export const register = async (req, res) => {
 
     const token = jwt.sign({ id: user.UserID }, config.jwtSecret);
 
+    try {
+      await redisClient.del("all-users");
+      console.log("🗑 Cache cleared: all-users");
+    } catch (cacheError) {
+      console.warn("⚠️ Redis cache deletion failed:", cacheError);
+    }
+
     res.status(201).json({ status: 'success', user, token });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -217,6 +224,14 @@ export const resetPassword = async (req, res) => {
  */
 export const getAllUsers = async (req, res) => {
   try {
+    // ✅ Check Redis cache first
+    const cachedUsers = await redisClient.get("all-users");
+    if (cachedUsers) {
+      console.log("⏩ Serving all users from Redis");
+      return res.status(200).json({ status: "success", users: JSON.parse(cachedUsers) });
+    }
+
+    console.log("⏳ Fetching all users from database...");
     const users = await prisma.user.findMany({
       where: { Role: "USER" },
       select: {
@@ -228,7 +243,10 @@ export const getAllUsers = async (req, res) => {
       },
     });
 
-    res.json({
+    // ✅ Store in Redis for 10 minutes
+    await redisClient.setEx("all-users", 600, JSON.stringify(users));
+
+    res.status(200).json({
       status: "success",
       users: users || [], // Ensure it always returns an array
     });
@@ -237,4 +255,5 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ status: "error", message: "Server error" });
   }
 };
+
 
