@@ -1,8 +1,15 @@
-import prisma from '../prisma.js';
-
+import prisma from "../prisma.js";
+import redisClient from "../utils/redis.js";
 
 export const getAdminDashboardData = async (req, res) => {
   try {
+    const cachedData = await redisClient.get("admin-dashboard");
+    if (cachedData) {
+      console.log("Serving from Redis Cache");
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    console.log("Fetching from Database...");
     // Total tests created
     const totalTests = await prisma.test.count();
 
@@ -14,28 +21,28 @@ export const getAdminDashboardData = async (req, res) => {
       include: {
         test: {
           select: {
-            Title: true
-          }
+            Title: true,
+          },
         },
         user: {
           select: {
             FirstName: true,
-            LastName: true
-          }
-        }
-      }
+            LastName: true,
+          },
+        },
+      },
     });
 
     // Aggregate data for tests per user
     const testsPerUser = await prisma.userTest.groupBy({
-      by: ['userId'],
+      by: ["userId"],
       _count: {
-        testId: true
+        testId: true,
       },
       where: {
         user: {
-          Role: 'USER'
-        }
+          Role: "USER",
+        },
       },
     });
 
@@ -64,9 +71,9 @@ export const getAdminDashboardData = async (req, res) => {
 
     // Aggregate data for users per test
     const usersPerTest = await prisma.userTest.groupBy({
-      by: ['testId'],
+      by: ["testId"],
       _count: {
-        userId: true
+        userId: true,
       },
     });
 
@@ -146,7 +153,7 @@ export const getAdminDashboardData = async (req, res) => {
       },
     });
 
-    res.status(200).json({
+    const responseData = {
       totalTests,
       totalUsers,
       testsAssigned,
@@ -155,10 +162,19 @@ export const getAdminDashboardData = async (req, res) => {
       userActivity,
       proctoringData,
       sessionDetails,
-    });
+    };
+
+    // Store in Redis for 10 minutes
+    await redisClient.setEx(
+      "admin-dashboard",
+      600,
+      JSON.stringify(responseData)
+    );
+
+    res.status(200).json(responseData);
   } catch (error) {
-    console.error('Error fetching admin dashboard data:', error);
-    res.status(500).json({ error: 'Failed to fetch admin dashboard data' });
+    console.error("Error fetching admin dashboard data:", error);
+    res.status(500).json({ error: "Failed to fetch admin dashboard data" });
   }
 };
 
@@ -254,7 +270,7 @@ export const getUserDashboardData = async (req, res) => {
       sessionDetails,
     });
   } catch (error) {
-    console.error('Error fetching user dashboard data:', error);
-    res.status(500).json({ error: 'Failed to fetch user dashboard data' });
+    console.error("Error fetching user dashboard data:", error);
+    res.status(500).json({ error: "Failed to fetch user dashboard data" });
   }
 };
