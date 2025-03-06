@@ -135,8 +135,8 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <h3 className="text-xl font-semibold mb-2 text-orange-500">Tests Per User:</h3>
-          <Bar data={testsPerUserData} options={options} />
+          <h3 className="text-xl font-semibold mb-2 text-orange-500">Users Per Test:</h3>
+          <Bar data={usersPerTestData} options={options} />
         </motion.div>
 
         <motion.div 
@@ -145,8 +145,8 @@ const AdminDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <h3 className="text-xl font-semibold mb-2 text-orange-500">Users Per Test:</h3>
-          <Bar data={usersPerTestData} options={options} />
+          <h3 className="text-xl font-semibold mb-2 text-orange-500">Tests Per User:</h3>
+          <Bar data={testsPerUserData} options={options} />
         </motion.div>
 
         <motion.div 

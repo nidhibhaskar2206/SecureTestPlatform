@@ -11,7 +11,7 @@ import {
 import Logo from "../assets/logo_bgless.png";
 import { CiEdit} from "react-icons/ci";
 import { useSelector } from "react-redux";
-
+import '../App.css'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -40,7 +40,7 @@ const DashboardLayout = () => {
   const navigation = userRole === "ADMIN" ? adminNavigation : userNavigation;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-orange-100 to-slate-50">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-orange-100 to-slate-50 custom-scrollbar">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col bg-[#fdfdfd] text-[#030811] border">
         <div className="flex items-center justify-center h-16 border-b border-gray-300 dark:border-gray-700">
@@ -81,7 +81,7 @@ const DashboardLayout = () => {
           </button>
         </header>
         {/* Main Section */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           <Outlet />
         </main>
       </div>
