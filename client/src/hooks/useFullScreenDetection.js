@@ -26,7 +26,7 @@ export const triggerFullscreen = () => {
 
 export function useFullScreenDetection({ disabled = false } = {}) {
   const [fullScreenStatus, setFullScreenStatus] = useState("pending");
-  const [isFullscreenEnabled, setIsFullscreenEnabled] = useState(false); // ✅ Track if fullscreen is enabled
+  const [isFullscreenEnabled, setIsFullscreenEnabled] = useState(false);
 
   const changeFullscreenStatus = useCallback(() => {
     const isFullScreenNow =
@@ -37,7 +37,7 @@ export function useFullScreenDetection({ disabled = false } = {}) {
 
     setFullScreenStatus(isFullScreenNow ? "on" : "off");
 
-    // If fullscreen is exited after being enabled, force fullscreen again
+    // Prevents accidental exit only if fullscreen is enabled
     if (isFullscreenEnabled && !isFullScreenNow) {
       console.warn("User attempted to exit fullscreen!");
       setTimeout(triggerFullscreen, 100);
@@ -52,19 +52,24 @@ export function useFullScreenDetection({ disabled = false } = {}) {
     }
   }, []);
 
-  // 🔹 Call this function when the user starts the test
+  // Enable Fullscreen Mode
   const enableFullscreenMode = () => {
-    setIsFullscreenEnabled(true); // ✅ Mark that fullscreen is enabled
-    triggerFullscreen(); // ✅ Force fullscreen
+    setIsFullscreenEnabled(true);
+    triggerFullscreen();
+  };
+
+  // Disable Fullscreen Mode (Used after test submission)
+  const disableFullscreenMode = () => {
+    setIsFullscreenEnabled(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch((err) =>
+        console.warn("Error exiting fullscreen:", err)
+      );
+    }
   };
 
   useEffect(() => {
-    if (disabled || isFullscreenEnabled === false) return; // ✅ Only run detection after fullscreen is enabled
-
-    if (isMobileSafari || (isChrome && isIOS)) {
-      setFullScreenStatus("not-supported");
-      return;
-    }
+    if (disabled || isFullscreenEnabled === false) return;
 
     changeFullscreenStatus();
 
@@ -83,5 +88,6 @@ export function useFullScreenDetection({ disabled = false } = {}) {
     };
   }, [disabled, isFullscreenEnabled]);
 
-  return { fullScreenStatus, enableFullscreenMode };
+  return { fullScreenStatus, enableFullscreenMode, disableFullscreenMode };
 }
+

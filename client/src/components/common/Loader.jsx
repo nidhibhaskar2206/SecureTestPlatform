@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-
+ 
 const variants = {
   initial: {
     scaleY: 0.5,
@@ -16,7 +16,7 @@ const variants = {
     },
   },
 };
-
+ 
 export const BarLoader = () => {
   return (
     <motion.div

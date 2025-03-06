@@ -62,9 +62,9 @@ const TestSummaryPage = () => {
                 <div
                   className={`p-2 rounded-md w-full ${
                     question.correctOption?.id === option.id
-                      ? "bg-green-300" // ✅ Prevents error if correctOption is undefined
+                      ? "bg-green-300" // Prevents error if correctOption is undefined
                       : question.chosenOption?.id === option.id
-                      ? "bg-red-300" // ✅ Prevents error if chosenOption is undefined
+                      ? "bg-red-300" // Prevents error if chosenOption is undefined
                       : "bg-gray-200"
                   }`}
                 >
