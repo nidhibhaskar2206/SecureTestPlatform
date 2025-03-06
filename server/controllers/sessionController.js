@@ -495,3 +495,68 @@ export const attempts = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+export const answerAttempt = async (req, res) => {
+  try {
+    const sessionId = parseInt(req.params.sessionId);
+    if (isNaN(sessionId)) {
+      return res.status(400).json({ error: "Invalid session ID" });
+    }
+
+    const { answers } = req.body;
+    if (!Array.isArray(answers)) {
+      return res.status(400).json({ error: "Answers should be an array" });
+    }
+
+    // Verify the session exists and belongs to the authenticated user.
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    
+    const savedAttempts = [];
+
+    // Loop through each answer provided
+    for (const answer of answers) {
+      const { questionId, selectedOptionId } = answer;
+
+      // Using the composite primary key (sessionId, questionId) to check for an existing attempt.
+      let attempt = await prisma.userQuestionAttempt.findUnique({
+        where: {
+          sessionId_questionId: { sessionId, questionId },
+        },
+      });
+
+      if (attempt) {
+        // Update the existing attempt with the new option and update the timestamp.
+        attempt = await prisma.userQuestionAttempt.update({
+          where: { sessionId_questionId: { sessionId, questionId } },
+          data: {
+            chosenOptionId: selectedOptionId,
+            timestamp: new Date(),
+          },
+        });
+      } else {
+        // Create a new attempt if none exists.
+        attempt = await prisma.userQuestionAttempt.create({
+          data: {
+            sessionId,
+            questionId,
+            chosenOptionId: selectedOptionId,
+          },
+        });
+      }
+      savedAttempts.push(attempt);
+    }
+
+    res
+      .status(201)
+      .json({ message: "Answers recorded", attempts: savedAttempts });
+  } catch (error) {
+    console.error("Error recording answers:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

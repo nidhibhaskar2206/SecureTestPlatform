@@ -318,3 +318,96 @@ export const getUserActivityOnTest = async (req, res) => {
     res.status(400).json({ error: 'Invalid input data' });
   }
 };
+
+export const testSummary = async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    const userId = parseInt(req.params.userId);
+
+    if (isNaN(testId) || isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid test ID or user ID" });
+    }
+
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      include: {
+        Questions: {
+          include: {
+            question: {
+              include: {
+                options: {
+                  include: { option: true },
+                },
+                correctOption: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    // Fetch user attempts
+    const attempts = await prisma.userQuestionAttempt.findMany({
+      where: {
+        session: { testId, userId },
+      },
+      include: {
+        question: {
+          select: { id: true, questionText: true, marks: true },
+        },
+        chosenOption: {
+          select: { id: true, optionText: true },
+        },
+      },
+    });
+
+    // Fetch correct options from CorrectOption Table
+    const correctOptions = await prisma.correctOption.findMany({
+      where: {
+        questionId: {
+          in: test.Questions.map((q) => q.question.id),
+        },
+      },
+      include: {
+        option: true,
+      },
+    });
+
+    // Map correct options to questionId for quick lookup
+    const correctOptionsMap = correctOptions.reduce((acc, correctOpt) => {
+      acc[correctOpt.questionId] = correctOpt.option;
+      return acc;
+    }, {});
+
+    // Map question attempts
+    const questionsWithAttempts = test.Questions.map((q) => {
+      const question = q.question;
+      const userAttempt = attempts.find(
+        (attempt) => attempt.question.id === question.id
+      );
+
+      return {
+        questionId: question.id,
+        questionText: question.questionText,
+        marks: question.marks,
+        options: question.options.map((opt) => opt.option),
+        correctOption: correctOptionsMap[question.id] || null, // ✅ Use the correct option from CorrectOption table
+        chosenOption: userAttempt ? userAttempt.chosenOption : null,
+      };
+    });
+
+    res.json({
+      testTitle: test.Title,
+      testDescription: test.Description,
+      totalMarks: test.TotalMarks,
+      questions: questionsWithAttempts,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching test summary:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
