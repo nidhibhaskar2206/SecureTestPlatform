@@ -1,0 +1,16 @@
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #fff5e6; /* Light orange background color */
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ff8c00; /* Orange color for the thumb */
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #ff6500; /* Darker orange color for hover effect */
+  }

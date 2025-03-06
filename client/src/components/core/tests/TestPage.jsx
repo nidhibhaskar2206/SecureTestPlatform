@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -9,11 +9,14 @@ import { toast } from "react-toastify";
 import { useProctoring } from "../../../hooks/useProctoring";
 import { useDevToolDetection } from "../../../hooks/useDevToolDetection";
 import { useCamDetection } from "../../../hooks/useCamDetection";
+import { useFullScreenDetection } from "../../../hooks/useFullScreenDetection";
+import { BarLoader } from "../../common/Loader";
 
 const TestPage = () => {
   const { testId, userId } = useParams();
   const token = useSelector((state) => state.auth.token);
   const navigate = useNavigate();
+  const videoRef = useRef(null);
 
   const [test, setTest] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -24,20 +27,11 @@ const TestPage = () => {
   const [message, setMessage] = useState("");
   const [testStarted, setTestStarted] = useState(false);
 
-  // ✅ Enable Proctoring Features after test starts
-  const { fullScreen } = useProctoring({
-    preventTabSwitch: testStarted,
-    forceFullScreen: testStarted,
-    preventContextMenu: testStarted,
-    preventUserSelection: testStarted,
-    preventCopy: testStarted,
-  });
-
-  // ✅ Detect if Developer Tools are Opened
+  // Hooks for Proctoring
+  const { enableFullscreenMode, disableFullscreenMode, fullScreenStatus } = useFullScreenDetection();
+  const { webCamStatus, requestCamAccess } = useCamDetection();
   const { devToolsOpen } = useDevToolDetection({ disabled: false });
 
-  // ✅ Detect Webcam Access (Optional)
-  const { webCamStatus } = useCamDetection({ disabled: false });
 
   useEffect(() => {
     const fetchTestDetailsAndUpdateSession = async () => {
@@ -102,14 +96,29 @@ const TestPage = () => {
     }
   }, [timeLeft, session, testStarted]);
 
-  // ✅ Detect Cheating Attempts (Fullscreen Exit, DevTools, Webcam)
+  useEffect(() => {
+    if (testStarted) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          if (videoRef?.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch(() => {
+          alert("⚠️ Webcam access is required! Your test will be terminated.");
+          handleSubmit();
+        });
+    }
+  }, [testStarted]);
+
   useEffect(() => {
     const preventFullscreenExit = () => {
       if (!document.fullscreenElement && testStarted) {
         alert("⚠️ Warning: You cannot exit fullscreen mode during the test!");
         setTimeout(() => {
-          requestFullscreen(); // ✅ Force fullscreen again
-        }, 500); // ✅ Delay to ensure fullscreen request is processed
+          requestFullscreen();
+        }, 500); 
       }
     };
 
@@ -132,37 +141,44 @@ const TestPage = () => {
       }
     }
   }, [devToolsOpen, webCamStatus, testStarted]);
-
-  // ✅ Force Fullscreen when Test Starts
+  
   const handleStartTest = () => {
     setTestStarted(true);
-    requestFullscreen(); // ✅ Force fullscreen on button click
+    enableFullscreenMode();
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        if (videoRef?.current) {
+          videoRef.current.srcObject = stream;
+        }
+      })
+      .catch(() => {
+        alert("⚠️ Webcam access is required! Your test will be terminated.");
+      });
   };
 
-  // ✅ Function to Force Fullscreen
-  const requestFullscreen = () => {
-    const element = document.documentElement;
-    if (element.requestFullscreen) {
-      element
-        .requestFullscreen()
-        .catch(() => console.warn("Fullscreen request denied"));
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    }
-  };
-
-  // ✅ Handle Answer Selection
   const handleSelectOption = (questionId, optionId) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
-  // ✅ Submit Test
   const handleSubmit = async () => {
     try {
+      if (!session?.id) {
+        toast.error("Session not found! Please reload and try again.");
+        return;
+      }
+
+      const answerPayload = Object.keys(answers).map((questionId) => ({
+        questionId: parseInt(questionId),
+        selectedOptionId: answers[questionId],
+      }));
+
+      await axios.post(
+        `${config.API_URL}/api/sessions/session/${session.id}/answers`,
+        { answers: answerPayload },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
       await axios.post(
         `${config.API_URL}/api/sessions/end/${session.id}`,
         { score: calculateScore() },
@@ -170,13 +186,22 @@ const TestPage = () => {
       );
 
       toast.success("Test submitted successfully!");
-      navigate("/");
+
+      if (videoRef.current?.srcObject) {
+        let stream = videoRef.current.srcObject;
+        let tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+
+      disableFullscreenMode();
+
+      navigate('/');
     } catch (error) {
       toast.error("Error submitting the test.");
     }
   };
-
-  // ✅ Calculate Test Score
+  
   const calculateScore = () => {
     let score = 0;
     questions.forEach((q) => {
@@ -188,11 +213,11 @@ const TestPage = () => {
     return score;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen"><BarLoader/></div>;
 
   if (message) {
     return (
-      <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+      <div className="flex flex-col items-center p-6">
         <h1 className="text-3xl font-bold text-orange-500">{test?.Title}</h1>
         <p className="text-lg text-gray-600 mt-2">{test?.Description}</p>
         <div className="text-red-500 font-bold text-xl mt-2">{message}</div>
@@ -201,7 +226,7 @@ const TestPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+    <div className="flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-orange-500">{test.Title}</h1>
       <p className="text-lg text-gray-600 mt-2">{test.Description}</p>
 
@@ -214,6 +239,16 @@ const TestPage = () => {
         </button>
       ) : (
         <>
+          <div className="absolute top-4 left-4 bg-black p-2 rounded-lg">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-32 h-24 rounded-md"
+            >
+              <track kind="captions" />
+            </video>
+          </div>
           <div className="text-red-500 font-bold text-xl mt-2">
             Time Left: {Math.floor(timeLeft / 60)}:{timeLeft % 60}
           </div>

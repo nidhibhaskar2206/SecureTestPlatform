@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import prisma from '../prisma.js';
+import redisClient from '../utils/redis.js';
 
 const testSchema = z.object({
   title: z.string().min(3).max(255),
@@ -47,6 +48,8 @@ export const createTest = async (req, res) => {
         CreatedBy: req.user.UserID
       }
     });
+    await redisClient.del("all-tests");
+
     res.status(201).json(test);
   } catch (error) {
     res.status(400).json({ error: 'Invalid input data' });
@@ -134,89 +137,139 @@ export const mapCorrectOption = async (req, res) => {
 };
 
 export const getAllTests = async (req, res) => {
-  const tests = await prisma.test.findMany({
-    where: {
-      ...(req.user?.Role !== 'ADMIN' && {
-        UserTests: {
-          some: {
-            userId: req.user.UserID
-          }
-        }
-      })
-    },
-    include: {
-      creator: {
-        select: {
-          FirstName: true,
-          LastName: true
-        }
-      }
+  try {
+    // Check Redis cache first
+    const cachedTests = await redisClient.get("all-tests");
+    if (cachedTests) {
+      console.log("⏩ Serving all tests from Redis");
+      return res.status(200).json(JSON.parse(cachedTests));
     }
-  });
-  res.json(tests);
+
+    console.log("⏳ Fetching all tests from database...");
+    const tests = await prisma.test.findMany({
+      where: {
+        ...(req.user?.Role !== "ADMIN" && {
+          UserTests: {
+            some: {
+              userId: req.user.UserID,
+            },
+          },
+        }),
+      },
+      include: {
+        creator: {
+          select: {
+            FirstName: true,
+            LastName: true,
+          },
+        },
+      },
+    });
+
+    // Store in Redis for 10 minutes
+    await redisClient.setEx("all-tests", 600, JSON.stringify(tests));
+
+    res.status(200).json(tests);
+  } catch (error) {
+    console.error("❌ Error fetching all tests:", error);
+    res.status(500).json({ error: "Failed to fetch all tests" });
+  }
 };
+
 
 export const getTestById = async (req, res) => {
-  const test = await prisma.test.findUnique({
-    where: { TestID: parseInt(req.params.id) },
-    include: {
-      Questions: {
-        include: {
-          question: {
-            include: {
-              options: {
-                include: {
-                  option: true
-                }
-              },
-              correctOption: true
-            }
-          }
-        }
-      },
-      creator: true,
-      Sessions: true,
-      UserTests: true
+  try {
+    const testId = parseInt(req.params.id);
+
+    // Check Redis cache first
+    const cacheKey = `test:${testId}`;
+    const cachedTest = await redisClient.get(cacheKey);
+    if (cachedTest) {
+      console.log(`⏩ Serving test ${testId} from Redis`);
+      return res.status(200).json(JSON.parse(cachedTest));
     }
-  });
 
-  if (!test) {
-    return res.status(404).json({ error: 'Test not found' });
+    console.log(`⏳ Fetching test ${testId} from database...`);
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      include: {
+        Questions: {
+          include: {
+            question: {
+              include: {
+                options: {
+                  include: {
+                    option: true,
+                  },
+                },
+                correctOption: true,
+              },
+            },
+          },
+        },
+        creator: true,
+        Sessions: true,
+        UserTests: true,
+      },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    // Store in Redis for 10 minutes
+    await redisClient.setEx(cacheKey, 600, JSON.stringify(test));
+
+    res.status(200).json(test);
+  } catch (error) {
+    console.error(`❌ Error fetching test ${testId}:`, error);
+    res.status(500).json({ error: "Failed to fetch test details" });
   }
-
-  res.json(test);
 };
+
 
 export const getAllTestOfUser = async (req, res) => {
   try {
     const userId = parseInt(req.params.userId);
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
 
-    // Fetch tests where the user is assigned
+    // Check Redis cache first
+    const cacheKey = `user-tests:${userId}`;
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log(`⏩ Serving tests for user ${userId} from Redis`);
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    console.log(`⏳ Fetching tests for user ${userId} from database...`);
     const assignedTests = await prisma.test.findMany({
       where: {
         UserTests: {
           some: {
-            userId: userId
-          }
-        }
+            userId: userId,
+          },
+        },
       },
       include: {
         creator: {
-          select: { FirstName: true, LastName: true }
-        }
-      }
+          select: { FirstName: true, LastName: true },
+        },
+      },
     });
 
-    res.json(assignedTests);
+    // Store in Redis for 10 minutes
+    await redisClient.setEx(cacheKey, 600, JSON.stringify(assignedTests));
+
+    res.status(200).json(assignedTests);
   } catch (error) {
-    console.error("❌ Error fetching user tests:", error);
+    console.error(`❌ Error fetching tests for user ${userId}:`, error);
     res.status(500).json({ error: "Internal server error" });
   }
-}
+};
+
 
 export const deleteTest = async (req, res) => {
   try {
@@ -236,6 +289,10 @@ export const deleteTest = async (req, res) => {
     await prisma.test.delete({
       where: { TestID: testId }
     });
+
+    await redisClient.del("all-tests");
+    await redisClient.del(`test:${testId}`);
+
 
     res.status(200).json({ message: 'Test deleted successfully' });
   } catch (error) {
@@ -318,3 +375,91 @@ export const getUserActivityOnTest = async (req, res) => {
     res.status(400).json({ error: 'Invalid input data' });
   }
 };
+
+export const testSummary = async (req, res) => {
+  try {
+    const testId = parseInt(req.params.testId);
+    const userId = parseInt(req.params.userId);
+
+    if (isNaN(testId) || isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid test ID or user ID" });
+    }
+
+    // Check Redis cache first
+    const cacheKey = `test-summary:${testId}:${userId}`;
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log(`⏩ Serving test summary for test ${testId} and user ${userId} from Redis`);
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
+    console.log(`⏳ Fetching test summary for test ${testId} and user ${userId} from database...`);
+
+    const test = await prisma.test.findUnique({
+      where: { TestID: testId },
+      include: {
+        Questions: {
+          include: {
+            question: {
+              include: {
+                options: {
+                  include: { option: true },
+                },
+                correctOption: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!test) {
+      return res.status(404).json({ error: "Test not found" });
+    }
+
+    const attempts = await prisma.userQuestionAttempt.findMany({
+      where: {
+        session: { testId, userId },
+      },
+      include: {
+        question: { select: { id: true, questionText: true, marks: true } },
+        chosenOption: { select: { id: true, optionText: true } },
+      },
+    });
+
+    const correctOptions = await prisma.correctOption.findMany({
+      where: { questionId: { in: test.Questions.map((q) => q.question.id) } },
+      include: { option: true },
+    });
+
+    const correctOptionsMap = correctOptions.reduce((acc, correctOpt) => {
+      acc[correctOpt.questionId] = correctOpt.option;
+      return acc;
+    }, {});
+
+    const questionsWithAttempts = test.Questions.map((q) => ({
+      questionId: q.question.id,
+      questionText: q.question.questionText,
+      marks: q.question.marks,
+      options: q.question.options.map((opt) => opt.option),
+      correctOption: correctOptionsMap[q.question.id] || null,
+      chosenOption: attempts.find((a) => a.question.id === q.question.id)?.chosenOption || null,
+    }));
+
+    const responseData = {
+      testTitle: test.Title,
+      testDescription: test.Description,
+      totalMarks: test.TotalMarks,
+      questions: questionsWithAttempts,
+    };
+
+    // Store in Redis for 10 minutes
+    await redisClient.setEx(cacheKey, 600, JSON.stringify(responseData));
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    console.error("❌ Error fetching test summary:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+

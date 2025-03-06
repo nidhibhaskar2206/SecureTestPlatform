@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { setAuth } from "../redux/slices/authSlice";
-import login from "../assets/login.jpg";
+import login from "../assets/login.png";
 import axios from "axios";
 import logo from "../assets/logo_bgless.png";
 import Header from "../components/common/Header";
@@ -286,7 +286,7 @@ const ForgetPage = () => {
   };
 
   return (
-    <div className="w-[100vw] h-[100vh] overflow-hidden">
+    <div className="w-[100vw] h-[100vh] overflow-hidden bg-gradient-to-br from-orange-100 to-slate-50">
       {/* Image section */}
       <Header />
       <div className="flex">

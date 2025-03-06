@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import login from "../assets/login.jpg";
+import login from "../assets/login.png";
 import logo from "../assets/logo_bgless.png";
 import axios from "axios";
 import Header from "../components/common/Header";
@@ -93,7 +93,7 @@ const RegisterPage = () => {
   
 
   return (
-    <div className="w-screen h-[100vh] overflow-hidden">
+    <div className="w-screen h-[100vh] overflow-hidden bg-gradient-to-br from-orange-100 to-slate-50">
       {/* Image section */}
       <Header />
       <div className="flex">
@@ -195,7 +195,7 @@ const RegisterPage = () => {
               <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-[1.5s] group-hover:[transform:skew(-12deg)_translateX(100%)]">
                 <div className="relative h-full w-8 bg-white/20"></div>
               </div>
-              <span className="mr-4 text-xl">Sign Up</span>
+              <span className="mr-4 text-xl">{loading ? "Signing in...." : "Sign Up"}</span>
             </button>
             </form>
           </div>

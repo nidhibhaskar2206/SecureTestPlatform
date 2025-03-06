@@ -98,7 +98,7 @@ const TestList = () => {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-center mt-6 space-x-4 fixed bottom-0 w-full bg-white p-12 z-20">
+        <div className="flex items-center justify-center mt-6 space-x-4 fixed bottom-0 w-full  p-12 z-20 overflow-hidden">
           <button
             onClick={handlePrev}
             disabled={currentPage === 1}
@@ -124,7 +124,7 @@ const TestList = () => {
                 : "bg-orange-500 hover:bg-orange-600 text-white"
             }`}
           >
-            <ChevronRightIcon className="h-5 w-5" />
+            <ChevronRightIcon className="h-5 w-5"/>
           </button>
         </div>
       </div>
