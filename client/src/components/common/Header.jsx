@@ -33,7 +33,7 @@ export default function Header() {
   auth?.user?.Role === "ADMIN" ? "/dashboard-admin" : "/dashboard-user";
 
   return (
-    <header className="bg-white/90">
+    <header className="">
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-7xl items-center justify-between gap-x-6 p-6 lg:px-8"
