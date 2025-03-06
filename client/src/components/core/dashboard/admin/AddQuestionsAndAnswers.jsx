@@ -139,7 +139,7 @@ const AddQuestionsAndOptions = () => {
 
   return (
     <div className="flex justify-center items-center">
-      <div className="w-full mt-10 bg-white p-6 px-40">
+      <div className="w-[80%] bg-transparent p-6 px-40">
         <h2 className="text-5xl font-bold mb-6 text-orange-500">
           Add Test Questions & Options
         </h2>

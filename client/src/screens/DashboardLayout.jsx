@@ -40,7 +40,7 @@ const DashboardLayout = () => {
   const navigation = userRole === "ADMIN" ? adminNavigation : userNavigation;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-orange-100 to-slate-50">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-col bg-[#fdfdfd] text-[#030811] border">
         <div className="flex items-center justify-center h-16 border-b border-gray-300 dark:border-gray-700">

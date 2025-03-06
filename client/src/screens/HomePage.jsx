@@ -1,11 +1,15 @@
-// import React from "react";
 import Header from "../components/common/Header";
 import { Link } from "react-router-dom";
-import Hero from "../assets/Hero.jpg";
+import Hero from "../assets/Hero.png";
+import { useSelector } from "react-redux";
 
 const HomePage = () => {
+  const auth = useSelector((state)=> state.auth)
+  const dashboardLink =
+  auth?.user?.Role === "ADMIN" ? "/dashboard-admin" : "/dashboard-user";
+
   return (
-    <div className="relative flex flex-col justify-center items-center">
+    <div className="relative flex flex-col justify-center items-center bg-gradient-to-br from-orange-100 to-slate-50 h-screen">
       <div className="fixed top-0 w-full z-40">
         <Header />
       </div>
@@ -21,7 +25,7 @@ const HomePage = () => {
               </p>
               <div className="mt-10 flex items-center gap-x-6 ml-12">
                 <Link
-                  to="/instructions"
+                  to={dashboardLink}
                   className="rounded-md bg-orange-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-orange-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   Get started
@@ -32,7 +36,7 @@ const HomePage = () => {
               </div>
             </div>
             <div className="mt-16 sm:mt-24 lg:mt-0 lg:shrink-0 lg:grow w-1/2">
-            <img src={Hero} alt="hero"></img>
+            <img src={Hero} alt="hero" className="w-[40rem] h-[40rem]"></img>
             </div>
           </div>
         </div>
