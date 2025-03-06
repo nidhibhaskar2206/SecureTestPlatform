@@ -10,7 +10,7 @@ export const triggerFullscreen = () => {
     "msRequestFullscreen",
   ];
 
-  const ref = document.documentElement; // ✅ Use full page instead of body
+  const ref = document.documentElement;
   if (ref) {
     for (const name of methods) {
       if (name in ref) {

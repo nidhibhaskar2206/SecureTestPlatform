@@ -157,33 +157,10 @@ const TestPage = () => {
       });
   };
 
-  // const handleStartTest = () => {
-  //   setTestStarted(true);
-  //   requestFullscreen(); 
-  // };
-  // const requestFullscreen = () => {
-  //   const element = document.documentElement;
-  //   if (element.requestFullscreen) {
-  //     element
-  //       .requestFullscreen()
-  //       .catch(() => console.warn("Fullscreen request denied"));
-  //   } else if (element.mozRequestFullScreen) {
-  //     element.mozRequestFullScreen();
-  //   } else if (element.webkitRequestFullscreen) {
-  //     element.webkitRequestFullscreen();
-  //   } else if (element.msRequestFullscreen) {
-  //     element.msRequestFullscreen();
-  //   }
-  // };
-
-  // Handle Answer Selection
   const handleSelectOption = (questionId, optionId) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
-  
-
-  // Submit Test
   const handleSubmit = async () => {
     try {
       if (!session?.id) {
@@ -210,7 +187,6 @@ const TestPage = () => {
 
       toast.success("Test submitted successfully!");
 
-      // ✅ Stop Camera Stream Properly
       if (videoRef.current?.srcObject) {
         let stream = videoRef.current.srcObject;
         let tracks = stream.getTracks();
@@ -218,17 +194,14 @@ const TestPage = () => {
         videoRef.current.srcObject = null;
       }
 
-      // ✅ Exit Fullscreen
       disableFullscreenMode();
 
-      navigate(`/test/${testId}/user/${userId}/summary`);
+      navigate('/');
     } catch (error) {
       toast.error("Error submitting the test.");
     }
   };
   
-
-  // Calculate Test Score
   const calculateScore = () => {
     let score = 0;
     questions.forEach((q) => {
@@ -244,7 +217,7 @@ const TestPage = () => {
 
   if (message) {
     return (
-      <div className="flex flex-col items-center p-6 min-h-screen">
+      <div className="flex flex-col items-center p-6">
         <h1 className="text-3xl font-bold text-orange-500">{test?.Title}</h1>
         <p className="text-lg text-gray-600 mt-2">{test?.Description}</p>
         <div className="text-red-500 font-bold text-xl mt-2">{message}</div>
@@ -253,7 +226,7 @@ const TestPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center p-6 min-h-screen">
+    <div className="flex flex-col items-center p-6">
       <h1 className="text-3xl font-bold text-orange-500">{test.Title}</h1>
       <p className="text-lg text-gray-600 mt-2">{test.Description}</p>
 
