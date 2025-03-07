@@ -70,7 +70,7 @@ const TestList = () => {
           <PlusIcon className="h-5 w-5 mr-2"/>Add Test
         </Link>
         {/* Grid Layout */}
-        <div className="grid grid-cols-3 gap-6 w-full max-w-7xl mx-auto">
+        <div className="grid grid-cols-3 gap-6 mx-auto">
           {currentTests.map((test) => (
             <div
               key={test.TestID}

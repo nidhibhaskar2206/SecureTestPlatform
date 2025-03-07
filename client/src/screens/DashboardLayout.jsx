@@ -72,7 +72,7 @@ const DashboardLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex items-center justify-between h-10  px-4 sm:px-6 lg:px-8  dark:bg-white">
+        <header className="sticky top-0 z-10 flex items-center justify-between h-10  px-4 sm:px-6 lg:px-8">
           <button
             className="text-[#030811] lg:hidden"
             onClick={() => setSidebarOpen(true)}
